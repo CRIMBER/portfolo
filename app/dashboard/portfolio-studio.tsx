@@ -153,11 +153,22 @@ export function PortfolioStudio({
 
   function updateColor(key: ColorKey, value: string) {
     touch();
-    setTheme((t) => ({
-      ...t,
-      colors: { ...t.colors, [key]: value },
-      background: key === "background" && t.background.kind === "solid" ? { ...t.background, value } : t.background,
-    }));
+    setTheme((t) => {
+      const colors = { ...t.colors, [key]: value };
+      // Solid/gradient backgrounds are derived from specific color
+      // fields, not just a one-time snapshot taken when the mode was
+      // picked (useSolidBackground/useGradientBackground below) — so
+      // editing the color that feeds the active mode has to re-derive
+      // background.value live, or the swatch updates while the actual
+      // rendered background silently stays frozen at its old value.
+      let background = t.background;
+      if (t.background.kind === "solid" && key === "background") {
+        background = { ...t.background, value };
+      } else if (t.background.kind === "gradient" && (key === "primary" || key === "secondary")) {
+        background = { ...t.background, value: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})` };
+      }
+      return { ...t, colors, background };
+    });
   }
 
   function updateSurfaceHex(hex: string) {
