@@ -139,7 +139,7 @@
      share of the row's width, leaving dead space past the last real
      field. auto-fit collapses those empty tracks so the real fields
      actually grow to fill the row. */
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 12px;
 }
 

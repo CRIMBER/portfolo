@@ -1355,7 +1355,7 @@ function WidgetInspector({
 
   return (
     <div className={canvasStyles.inspectorGrid}>
-      <label className={canvasStyles.controlField}>
+      <label className={canvasStyles.controlField} style={{ gridColumn: "1 / -1" }}>
         Widget type
         <select value={payload.kind} onChange={(e) => setKind(e.target.value as WidgetKind)}>
           {WIDGET_KINDS.map((kind) => (
@@ -1425,7 +1425,7 @@ function WidgetInspector({
 
       {payload.kind === "marquee" && (
         <>
-          <label className={canvasStyles.controlField} style={{ minWidth: "100%" }}>
+          <label className={canvasStyles.controlField} style={{ gridColumn: "1 / -1" }}>
             Text
             <input
               type="text"
@@ -1449,7 +1449,7 @@ function WidgetInspector({
       )}
 
       {payload.kind === "skillbars" && (
-        <div style={{ minWidth: "100%", display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: 8 }}>
           {payload.data.skills.map((skill, i) => (
             <div key={i} style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <input
