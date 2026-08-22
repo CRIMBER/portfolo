@@ -21,6 +21,9 @@ export default async function Home() {
             Sign in
           </a>
         )}
+        <a href="/directory" className="btn-secondary">
+          Browse the directory
+        </a>
       </div>
     </main>
   );

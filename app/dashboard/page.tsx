@@ -106,6 +106,9 @@ export default async function DashboardPage() {
           </div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
+          <a href="/directory" className="btn-secondary">
+            Directory
+          </a>
           {member.isOwner && (
             <a href="/admin" className="btn-secondary">
               Admin

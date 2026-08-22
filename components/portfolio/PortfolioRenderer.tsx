@@ -91,7 +91,11 @@ const HERO_ENTRANCE_CLASS: Record<string, string> = {
   "bounce-in": styles.bounceIn,
 };
 
-const HOVER_CLASS: Record<string, string> = {
+// Exported so the member directory (app/directory) can preview each
+// person's actual chosen hover style on their card, reusing the exact
+// same CSS rather than a separate copy that could drift from what
+// their real page does.
+export const HOVER_CLASS: Record<string, string> = {
   "subtle-lift": styles.subtleLift,
   glow: styles.hoverGlow,
   tilt: styles.tilt,
