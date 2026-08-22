@@ -1,7 +1,7 @@
 import { Fraunces } from "next/font/google";
 import { auth } from "@/auth";
 import { ChevronRightIcon } from "@/components/icons";
-import { PixelFace } from "@/components/PixelFace";
+import { PixelSwarm } from "@/components/PixelSwarm";
 import styles from "./home.module.css";
 
 const fraunces = Fraunces({
@@ -16,7 +16,7 @@ export default async function Home() {
 
   return (
     <div className={`${styles.page} ${fraunces.variable}`}>
-      <PixelFace color="#8b85ff" />
+      <PixelSwarm />
       <div className={styles.vignette} aria-hidden="true" />
       <div className={styles.kicker}>Portfolio Platform</div>
       <main className={styles.hero}>
