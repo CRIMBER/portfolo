@@ -95,7 +95,33 @@
   touch-action: none;
 }
 
-.resizeHandle {
+/* One handle per side (n/s/e/w) plus the original corner (se) — lets
+   a member resize from any edge, not just drag-grow from one corner. */
+.resizeHandle_n {
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: ns-resize;
+}
+.resizeHandle_s {
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: ns-resize;
+}
+.resizeHandle_e {
+  top: 50%;
+  right: -8px;
+  transform: translateY(-50%);
+  cursor: ew-resize;
+}
+.resizeHandle_w {
+  top: 50%;
+  left: -8px;
+  transform: translateY(-50%);
+  cursor: ew-resize;
+}
+.resizeHandle_se {
   right: -8px;
   bottom: -8px;
   cursor: nwse-resize;

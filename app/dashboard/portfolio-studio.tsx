@@ -1513,18 +1513,26 @@ function EditableElement({
   onDelete: () => void;
   canvasRef: RefObject<HTMLDivElement | null>;
 }) {
+  // Resize handles are named by which edge(s) they drag: "e"/"w" grow
+  // the box from the right/left edge (only one of those two ever
+  // applies per handle), "n"/"s" from the top/bottom edge, and a
+  // corner like "se" combines one of each — independent because width
+  // and height are adjusted separately below.
+  type ResizeDir = "n" | "s" | "e" | "w" | "ne" | "nw" | "se" | "sw";
+
   const drag = useRef<{
     mode: "move" | "resize" | "rotate";
+    dir?: ResizeDir;
     startX: number;
     startY: number;
     orig: CanvasElementData;
   } | null>(null);
 
-  function beginDrag(e: ReactPointerEvent<HTMLDivElement>, mode: "move" | "resize" | "rotate") {
+  function beginDrag(e: ReactPointerEvent<HTMLDivElement>, mode: "move" | "resize" | "rotate", dir?: ResizeDir) {
     e.stopPropagation();
     onSelect();
     e.currentTarget.setPointerCapture(e.pointerId);
-    drag.current = { mode, startX: e.clientX, startY: e.clientY, orig: element };
+    drag.current = { mode, dir, startX: e.clientX, startY: e.clientY, orig: element };
   }
 
   function onPointerMove(e: ReactPointerEvent<HTMLDivElement>) {
@@ -1538,12 +1546,33 @@ function EditableElement({
     if (d.mode === "move") {
       const dxPct = (dxPx / rect.width) * 100;
       onChange({ xPct: clamp(d.orig.xPct + dxPct, -20, 100), yPx: d.orig.yPx + dyPx });
-    } else if (d.mode === "resize") {
+    } else if (d.mode === "resize" && d.dir) {
       const dxPct = (dxPx / rect.width) * 100;
-      onChange({
-        widthPct: clamp(d.orig.widthPct + dxPct, 2, 100),
-        heightPx: clamp(d.orig.heightPx + dyPx, 10, 4000),
-      });
+      const patch: Partial<CanvasElementData> = {};
+
+      if (d.dir.includes("e")) {
+        patch.widthPct = clamp(d.orig.widthPct + dxPct, 2, 100);
+      } else if (d.dir.includes("w")) {
+        // Dragging the west edge should keep the *right* edge fixed —
+        // width grows/shrinks by the drag delta and x moves by the
+        // opposite amount, using the post-clamp delta so the anchor
+        // stays put even once width hits its min/max.
+        const newWidth = clamp(d.orig.widthPct - dxPct, 2, 100);
+        const actualDelta = newWidth - d.orig.widthPct;
+        patch.widthPct = newWidth;
+        patch.xPct = clamp(d.orig.xPct - actualDelta, -20, 100);
+      }
+
+      if (d.dir.includes("s")) {
+        patch.heightPx = clamp(d.orig.heightPx + dyPx, 10, 4000);
+      } else if (d.dir.includes("n")) {
+        const newHeight = clamp(d.orig.heightPx - dyPx, 10, 4000);
+        const actualDelta = newHeight - d.orig.heightPx;
+        patch.heightPx = newHeight;
+        patch.yPx = d.orig.yPx - actualDelta;
+      }
+
+      onChange(patch);
     } else if (d.mode === "rotate") {
       const centerX = rect.left + ((d.orig.xPct + d.orig.widthPct / 2) / 100) * rect.width;
       const centerY = rect.top + d.orig.yPx + d.orig.heightPx / 2;
@@ -1622,7 +1651,15 @@ function EditableElement({
           >
             <CloseIcon size={11} />
           </button>
-          <div className={canvasStyles.resizeHandle} onPointerDown={(e) => beginDrag(e, "resize")} onPointerMove={onPointerMove} onPointerUp={endDrag} />
+          {(["n", "s", "e", "w", "se"] as const).map((dir) => (
+            <div
+              key={dir}
+              className={`${canvasStyles.resizeHandle} ${canvasStyles[`resizeHandle_${dir}`]}`}
+              onPointerDown={(e) => beginDrag(e, "resize", dir)}
+              onPointerMove={onPointerMove}
+              onPointerUp={endDrag}
+            />
+          ))}
           <div className={canvasStyles.rotateHandle} onPointerDown={(e) => beginDrag(e, "rotate")} onPointerMove={onPointerMove} onPointerUp={endDrag} />
         </>
       )}

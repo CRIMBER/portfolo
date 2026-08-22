@@ -37,8 +37,22 @@
 .skillLabelRow {
   display: flex;
   justify-content: space-between;
+  gap: 0.5em;
   font-size: 0.7em;
   font-weight: 600;
+}
+/* Flex items refuse to shrink below their own text width by default
+   (min-width: auto), so a long label in a narrow widget was pushing
+   the row wider than its box instead of truncating — the overflow
+   then got clipped raggedly by .elementInner's overflow: hidden. */
+.skillLabelRow span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.skillLabelRow span:last-child {
+  flex-shrink: 0;
 }
 .skillTrack {
   width: 100%;
