@@ -1,0 +1,130 @@
+/* Fixed dark palette regardless of system light/dark preference —
+   same precedent as the portfolio renderer (components/portfolio),
+   which sets its own explicit colors rather than inheriting the
+   app-shell's --bg/--text tokens. The editorial look is a deliberate
+   choice, not a dark-mode variant. */
+.page {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  background: #0a0a0c;
+  color: #f4f4f2;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 25% 15%, rgba(139, 133, 255, 0.1), transparent 55%),
+    radial-gradient(ellipse at 100% 100%, rgba(0, 0, 0, 0.65), transparent 50%);
+}
+
+.kicker {
+  position: relative;
+  z-index: 1;
+  padding: 32px 40px 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(244, 244, 242, 0.55);
+}
+
+/* Overrides globals.css's bare `main` rule (max-width/padding/gap
+   meant for the boxed app-shell pages) — this page is deliberately
+   full-bleed, content anchored low with generous negative space
+   above rather than centered. */
+.hero {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 40px 96px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 28px;
+}
+
+.headline {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(2.6rem, 8vw, 6.2rem);
+  line-height: 1.03;
+  letter-spacing: -0.02em;
+  max-width: 16ch;
+  margin: 0;
+}
+.headline em {
+  font-style: italic;
+  font-weight: 600;
+  color: #b3aaff;
+}
+
+.subhead {
+  font-size: clamp(0.95rem, 1.6vw, 1.15rem);
+  color: rgba(244, 244, 242, 0.62);
+  max-width: 46ch;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 28px;
+  margin-top: 12px;
+}
+
+.status {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(244, 244, 242, 0.5);
+}
+
+.link,
+.linkSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: #f4f4f2;
+  padding-bottom: 3px;
+  border-bottom: 1px solid rgba(244, 244, 242, 0.3);
+  transition:
+    border-color 200ms ease,
+    color 200ms ease;
+}
+.link:hover,
+.linkSecondary:hover {
+  border-color: #b3aaff;
+  color: #b3aaff;
+  text-decoration: none;
+}
+
+.linkSecondary {
+  font-weight: 500;
+  color: rgba(244, 244, 242, 0.6);
+  border-bottom-color: rgba(244, 244, 242, 0.15);
+}
+
+@media (max-width: 560px) {
+  .kicker {
+    padding: 24px 24px 0;
+  }
+  .hero {
+    padding: 0 24px 64px;
+  }
+}
