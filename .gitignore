@@ -17,6 +17,10 @@
 /.next/
 /out/
 
+# member-uploaded media — local filesystem storage is a dev-only
+# stand-in for the planned S3-compatible storage
+/public/uploads/
+
 # production
 /build
 
@@ -32,6 +36,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel

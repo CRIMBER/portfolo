@@ -1,12 +1,50 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f6f6f8;
+  --surface: #ffffff;
+  --surface-2: #f0f0f3;
+  --border: #e2e2e6;
+  --text: #16161a;
+  --text-muted: #6b6b76;
+  --accent: #3452ff;
+  --accent-soft: #e8ebff;
+  --accent-text: #ffffff;
+  --danger: #d1293d;
+  --danger-soft: #fbe7e9;
+  --success: #1a8a4a;
+  --success-soft: #e3f5e9;
+  --warning: #a5690a;
+  --warning-soft: #fbedd8;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --shadow-sm: 0 1px 2px rgba(16, 16, 20, 0.05), 0 1px 1px rgba(16, 16, 20, 0.03);
+  --shadow-md: 0 8px 24px rgba(16, 16, 20, 0.08);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg: #0f0f12;
+    --surface: #19191d;
+    --surface-2: #212126;
+    --border: #2c2c33;
+    --text: #f2f2f5;
+    --text-muted: #9a9aa5;
+    --accent: #7c90ff;
+    --accent-soft: #262c4d;
+    --accent-text: #0c0c10;
+    --danger: #ff6b7a;
+    --danger-soft: #3a1c22;
+    --success: #4ade80;
+    --success-soft: #163524;
+    --warning: #f5b94d;
+    --warning-soft: #3a2c14;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.45);
+  }
+
+  html {
+    color-scheme: dark;
   }
 }
 
@@ -20,30 +58,311 @@ body {
   overflow-x: hidden;
 }
 
-body {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+body {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: var(--text);
+  background: var(--bg);
+  font-family:
+    var(--font-geist-sans),
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+code,
+.mono {
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Consolas, monospace;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* App-shell chrome (/, /login, /dashboard, /admin). The theme
+   renderer (components/portfolio) sets its own colors explicitly and
+   overrides all of this within its own subtree. */
+main {
+  width: 100%;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 48px 24px 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+main.narrow {
+  max-width: 420px;
+  padding-top: 15vh;
+}
+
+h1 {
+  font-size: 1.85rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: 1.02rem;
+  font-weight: 700;
+}
+
+p {
+  color: var(--text-muted);
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 4px 0;
+}
+
+form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+input,
+select {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+}
+input:focus-visible,
+select:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+input[type="color"] {
+  padding: 3px;
+  width: 44px;
+  height: 36px;
+  cursor: pointer;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  padding: 0;
+  border: none;
+  height: 20px;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+button {
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent-text);
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 9px 16px;
+  cursor: pointer;
+  transition:
+    filter 120ms ease,
+    transform 80ms ease,
+    opacity 120ms ease;
+}
+button:hover {
+  filter: brightness(1.08);
+}
+button:active {
+  transform: scale(0.97);
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
+  transform: none;
+}
+
+/* Secondary / chip-style button — opt in with className="btn-secondary".
+   Self-sufficient (not just an override of the `button` element rule)
+   so it looks right on an <a> too. */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 16px;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    transform 80ms ease;
+}
+.btn-secondary:hover {
+  background: var(--surface-2);
+  text-decoration: none;
+}
+.btn-secondary:active {
+  transform: scale(0.97);
+}
+.btn-secondary[data-active="true"] {
+  color: var(--accent-text);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+th {
+  color: var(--text-muted);
+  font-weight: 600;
+  background: var(--surface-2);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+/* Status pill — className="badge" plus a data-tone of neutral | accent | success | warning | danger */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+.badge[data-tone="accent"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.badge[data-tone="success"] {
+  background: var(--success-soft);
+  color: var(--success);
+}
+.badge[data-tone="warning"] {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+.badge[data-tone="danger"] {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+/* Card container — className="panel" */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Themed scrollbar for the public portfolio page — inert everywhere
+   else, since --tc-scrollbar-* is only set (by ScrollbarTheme.tsx)
+   while a portfolio page is mounted. Falls back to a neutral color on
+   app-chrome pages. */
+html {
+  scrollbar-color: var(--tc-scrollbar-thumb, var(--text-muted)) var(--tc-scrollbar-track, transparent);
+}
+html::-webkit-scrollbar {
+  width: 12px;
+}
+html::-webkit-scrollbar-track {
+  background: var(--tc-scrollbar-track, transparent);
+}
+html::-webkit-scrollbar-thumb {
+  background-color: var(--tc-scrollbar-thumb, var(--text-muted));
+  border-radius: 8px;
+  border: 3px solid var(--tc-scrollbar-track, var(--bg));
+  background-clip: padding-box;
 }

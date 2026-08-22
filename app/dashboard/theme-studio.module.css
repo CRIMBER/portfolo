@@ -1,0 +1,155 @@
+.studio {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.panelHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.panelHeader p {
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* ---- starting point ---- */
+.presetGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.presetChip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  text-transform: capitalize;
+  font-weight: 600;
+}
+
+.swatches {
+  display: flex;
+  gap: 5px;
+}
+
+.swatchDot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+/* ---- colors ---- */
+.colorGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 16px 12px;
+  align-items: start;
+}
+
+.colorField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.colorRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hexValue {
+  font-size: 0.72rem;
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Consolas, monospace;
+  color: var(--text-muted);
+}
+
+.controlsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.controlField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  min-width: 200px;
+}
+
+.hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* ---- background ---- */
+.backgroundRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.fileLabel {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ---- animations ---- */
+.tableWrap {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+}
+
+.tableWrap table {
+  min-width: 480px;
+}
+
+.activeRow td {
+  background: var(--accent-soft);
+}
+
+.presetSelect,
+.intensitySelect {
+  width: 100%;
+}
+
+/* ---- preview ---- */
+.previewFrame {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* ---- save bar ---- */
+.saveBar {
+  position: sticky;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  align-self: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 20px 8px 8px;
+  box-shadow: var(--shadow-md);
+}
+
+.saveBar button {
+  border-radius: 999px;
+}
