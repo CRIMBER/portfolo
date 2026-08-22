@@ -23,5 +23,12 @@ export async function GET(
   // point — see lib/analytics.ts) this visit came from a scan rather
   // than a direct link, without this route needing to record anything
   // itself and risk double-counting the same visit.
-  return NextResponse.redirect(new URL(`/@${portfolio.member.username}?src=qr`, request.url));
+  //
+  // Built from SITE_URL rather than request.url/request.nextUrl —
+  // behind Railway's proxy, the request Next.js actually sees carries
+  // an internal host (the same issue AUTH_TRUST_HOST/AUTH_URL fixed
+  // for Auth.js), so redirecting off of it sends real visitors to a
+  // dead internal address instead of the public site.
+  const origin = process.env.SITE_URL ?? new URL(request.url).origin;
+  return NextResponse.redirect(new URL(`/@${portfolio.member.username}?src=qr`, origin));
 }
