@@ -4,6 +4,7 @@ import Credentials from "next-auth/providers/credentials";
 import type { MemberStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { minimalPreset } from "@/lib/theme/presets";
+import { sendNewSignupEmail } from "@/lib/email";
 
 // Members aren't modeled as next-auth's own User/Account tables — the
 // Member row in prisma/schema.prisma is the source of truth for
@@ -75,6 +76,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             : undefined,
         },
       });
+
+      if (!isOwnerEmail) {
+        const ownerMember = await prisma.member.findFirst({ where: { isOwner: true }, select: { email: true } });
+        if (ownerMember) await sendNewSignupEmail(ownerMember.email, user.email);
+      }
 
       return true;
     },

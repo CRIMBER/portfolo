@@ -5,6 +5,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireOwner } from "@/lib/auth/session";
 import { minimalPreset } from "@/lib/theme/presets";
+import { sendApprovalStatusEmail } from "@/lib/email";
 
 // The Owner approves/removes members but has no control over
 // portfolio content (per the role spec) — these actions only ever
@@ -22,7 +23,7 @@ async function guardTarget(memberId: string, actingOwnerId: string) {
 
 export async function approveMember(memberId: string) {
   const owner = await requireOwner();
-  await guardTarget(memberId, owner.id);
+  const target = await guardTarget(memberId, owner.id);
 
   await prisma.member.update({
     where: { id: memberId },
@@ -37,13 +38,15 @@ export async function approveMember(memberId: string) {
     },
   });
 
+  await sendApprovalStatusEmail(target.email, "APPROVED");
   revalidatePath("/admin");
 }
 
 export async function rejectMember(memberId: string) {
   const owner = await requireOwner();
-  await guardTarget(memberId, owner.id);
+  const target = await guardTarget(memberId, owner.id);
   await prisma.member.update({ where: { id: memberId }, data: { status: "REJECTED" } });
+  await sendApprovalStatusEmail(target.email, "REJECTED");
   revalidatePath("/admin");
 }
 
