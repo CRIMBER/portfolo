@@ -102,11 +102,14 @@ export function PixelFace({ color }: { color: string }) {
       cellSize = 8 * scale;
 
       const faceSize = GRID * cellSize;
-      const originX = width - faceSize - Math.max(24, width * 0.04);
-      const originY = height * 0.12;
+      const originX = width - faceSize - Math.max(90, width * 0.08);
+      const originY = height * 0.14;
       const centerX = originX + faceSize / 2;
       const centerY = originY + faceSize / 2;
-      const burstRadius = faceSize * 0.9;
+      // Kept tight enough that even at peak dispersion most particles
+      // stay within the canvas — too large and the burst scatters
+      // past the edges and momentarily reads as just empty space.
+      const burstRadius = faceSize * 0.4;
 
       const mask = buildMask();
       particles = [];
