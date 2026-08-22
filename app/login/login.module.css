@@ -1,0 +1,62 @@
+/* Decorative flourish scoped to the login page only — home/directory
+   get similar treatment per the "opt-in flourish" note in
+   globals.css; dashboard/admin stay plain there on purpose. */
+.loginMain {
+  position: relative;
+}
+
+.blobs {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.blobOne,
+.blobTwo {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.35;
+}
+.blobOne {
+  width: 420px;
+  height: 420px;
+  top: -120px;
+  left: -100px;
+  background: var(--accent);
+}
+.blobTwo {
+  width: 380px;
+  height: 380px;
+  bottom: -140px;
+  right: -80px;
+  background: var(--accent-2);
+}
+@media (prefers-color-scheme: dark) {
+  .blobOne,
+  .blobTwo {
+    opacity: 0.25;
+  }
+}
+
+.panelEntrance {
+  position: relative;
+  z-index: 1;
+  animation: loginPanelIn 480ms ease both;
+}
+@keyframes loginPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .panelEntrance {
+    animation: none;
+  }
+}

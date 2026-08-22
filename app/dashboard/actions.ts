@@ -151,7 +151,13 @@ const ALLOWED_IMAGE_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "i
 // multi-file selection (see uploadProjectMedia) can upload several
 // files within the same millisecond, which would otherwise collide.
 function uniqueFilename(memberId: string, mimeType: string): string {
-  const ext = mimeType.split("/")[1] === "jpeg" ? "jpg" : mimeType.split("/")[1];
+  const subtype = mimeType.split("/")[1];
+  // audio/mpeg is what browsers report for .mp3 uploads — saving it
+  // as .mpeg would get served with the wrong Content-Type (static
+  // file serving maps .mpeg to video/mpeg, not audio/mpeg). Safe to
+  // special-case unconditionally: mpeg never appears for image/video
+  // uploads here (ALLOWED_VIDEO_TYPES is only mp4/webm).
+  const ext = subtype === "jpeg" ? "jpg" : subtype === "mpeg" ? "mp3" : subtype;
   const suffix = Math.random().toString(36).slice(2, 8);
   return `${memberId}-${Date.now()}-${suffix}.${ext}`;
 }
@@ -249,4 +255,34 @@ export async function uploadProjectMedia(
   await writeFile(path.join(uploadsDir, filename), Buffer.from(await file.arrayBuffer()));
 
   return { url: `/uploads/media/${filename}`, type: isVideo ? "video" : "image", error: null };
+}
+
+const MAX_AUDIO_UPLOAD_BYTES = 10 * 1024 * 1024;
+const ALLOWED_AUDIO_TYPES = new Set(["audio/mpeg", "audio/mp3", "audio/wav", "audio/ogg"]);
+
+// Same local-filesystem-storage caveat as the uploads above — fine
+// for this dev scaffold, but public/ writes don't survive a
+// serverless/production deploy. Swap this for the planned
+// S3-compatible storage before shipping (see AGENTS.md / project key
+// decisions).
+export async function uploadMusicFile(formData: FormData): Promise<{ url: string | null; error: string | null }> {
+  const member = await requireApprovedMember();
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { url: null, error: "Choose an audio file." };
+  }
+  if (!ALLOWED_AUDIO_TYPES.has(file.type)) {
+    return { url: null, error: "Must be MP3, WAV, or OGG." };
+  }
+  if (file.size > MAX_AUDIO_UPLOAD_BYTES) {
+    return { url: null, error: "Audio must be under 10MB." };
+  }
+
+  const filename = uniqueFilename(member.id, file.type);
+  const uploadsDir = path.join(process.cwd(), "public", "uploads", "music");
+  await mkdir(uploadsDir, { recursive: true });
+  await writeFile(path.join(uploadsDir, filename), Buffer.from(await file.arrayBuffer()));
+
+  return { url: `/uploads/music/${filename}`, error: null };
 }

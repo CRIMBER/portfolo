@@ -48,6 +48,7 @@ export async function recordPageView(portfolioId: string, source: "DIRECT" | "QR
 export interface PortfolioStats {
   total: number;
   last7d: number;
+  prev7d: number; // views in the 7 days *before* the last7d window — powers the dashboard's trend badge
   last30d: number;
   direct: number;
   qr: number;
@@ -57,6 +58,7 @@ export interface PortfolioStats {
 export async function getPortfolioStats(portfolioId: string): Promise<PortfolioStats> {
   const now = new Date();
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const prevWindowStart = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   // UTC day boundaries throughout — createdAt.toISOString() below is
   // always UTC, so bucketing against a *local* midnight (e.g. via
@@ -68,9 +70,10 @@ export async function getPortfolioStats(portfolioId: string): Promise<PortfolioS
   const fourteenDaysAgo = new Date(todayUtc);
   fourteenDaysAgo.setUTCDate(fourteenDaysAgo.getUTCDate() - 13);
 
-  const [total, last7d, last30d, bySource, recentViews] = await Promise.all([
+  const [total, last7d, prev7d, last30d, bySource, recentViews] = await Promise.all([
     prisma.pageView.count({ where: { portfolioId } }),
     prisma.pageView.count({ where: { portfolioId, createdAt: { gte: sevenDaysAgo } } }),
+    prisma.pageView.count({ where: { portfolioId, createdAt: { gte: prevWindowStart, lt: sevenDaysAgo } } }),
     prisma.pageView.count({ where: { portfolioId, createdAt: { gte: thirtyDaysAgo } } }),
     prisma.pageView.groupBy({ by: ["source"], where: { portfolioId }, _count: true }),
     prisma.pageView.findMany({
@@ -102,6 +105,7 @@ export async function getPortfolioStats(portfolioId: string): Promise<PortfolioS
   return {
     total,
     last7d,
+    prev7d,
     last30d,
     direct,
     qr,

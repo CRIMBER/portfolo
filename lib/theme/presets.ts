@@ -41,6 +41,7 @@ export const minimalPreset: ThemeConfig = {
   intro: { presetId: null, durationMs: 2200 },
   qrIntro: { presetId: null, durationMs: 1800 },
   reel: { enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 },
+  music: { url: null, volume: 0.5, autoplay: true },
 };
 
 export const cyberpunkPreset: ThemeConfig = {
@@ -79,6 +80,7 @@ export const cyberpunkPreset: ThemeConfig = {
   intro: { presetId: null, durationMs: 2200 },
   qrIntro: { presetId: null, durationMs: 1800 },
   reel: { enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 },
+  music: { url: null, volume: 0.5, autoplay: true },
 };
 
 export const glassPreset: ThemeConfig = {
@@ -122,6 +124,7 @@ export const glassPreset: ThemeConfig = {
   intro: { presetId: null, durationMs: 2200 },
   qrIntro: { presetId: null, durationMs: 1800 },
   reel: { enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 },
+  music: { url: null, volume: 0.5, autoplay: true },
 };
 
 export const editorialPreset: ThemeConfig = {
@@ -159,6 +162,7 @@ export const editorialPreset: ThemeConfig = {
   intro: { presetId: null, durationMs: 2200 },
   qrIntro: { presetId: null, durationMs: 1800 },
   reel: { enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 },
+  music: { url: null, volume: 0.5, autoplay: true },
 };
 
 export const futuristicPreset: ThemeConfig = {
@@ -198,6 +202,7 @@ export const futuristicPreset: ThemeConfig = {
   intro: { presetId: null, durationMs: 2200 },
   qrIntro: { presetId: null, durationMs: 1800 },
   reel: { enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 },
+  music: { url: null, volume: 0.5, autoplay: true },
 };
 
 export const brutalistPreset: ThemeConfig = {
@@ -236,6 +241,7 @@ export const brutalistPreset: ThemeConfig = {
   intro: { presetId: null, durationMs: 2200 },
   qrIntro: { presetId: null, durationMs: 1800 },
   reel: { enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 },
+  music: { url: null, volume: 0.5, autoplay: true },
 };
 
 export const retroPreset: ThemeConfig = {
@@ -274,6 +280,7 @@ export const retroPreset: ThemeConfig = {
   intro: { presetId: null, durationMs: 2200 },
   qrIntro: { presetId: null, durationMs: 1800 },
   reel: { enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 },
+  music: { url: null, volume: 0.5, autoplay: true },
 };
 
 export const experimentalPreset: ThemeConfig = {
@@ -312,6 +319,7 @@ export const experimentalPreset: ThemeConfig = {
   intro: { presetId: null, durationMs: 2200 },
   qrIntro: { presetId: null, durationMs: 1800 },
   reel: { enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 },
+  music: { url: null, volume: 0.5, autoplay: true },
 };
 
 export const professionalPreset: ThemeConfig = {
@@ -349,6 +357,7 @@ export const professionalPreset: ThemeConfig = {
   intro: { presetId: null, durationMs: 2200 },
   qrIntro: { presetId: null, durationMs: 1800 },
   reel: { enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 },
+  music: { url: null, volume: 0.5, autoplay: true },
 };
 
 export const artisticPreset: ThemeConfig = {
@@ -387,6 +396,7 @@ export const artisticPreset: ThemeConfig = {
   intro: { presetId: null, durationMs: 2200 },
   qrIntro: { presetId: null, durationMs: 1800 },
   reel: { enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 },
+  music: { url: null, volume: 0.5, autoplay: true },
 };
 
 export const startingPresets: Record<string, ThemeConfig> = {

@@ -6,9 +6,11 @@ import { parseCanvasElement } from "@/lib/canvas/validate";
 import { stableSlugUrl, generateQrSvg, generateQrPngDataUrl } from "@/lib/qr";
 import { getPortfolioStats, type PortfolioStats } from "@/lib/analytics";
 import { toPortfolioMedia } from "@/components/portfolio/PortfolioRenderer";
+import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "@/components/icons";
 import { UsernameForm } from "./username-form";
 import { PortfolioStudio } from "./portfolio-studio";
 import { togglePublish } from "./actions";
+import styles from "./dashboard.module.css";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -122,7 +124,16 @@ export default async function DashboardPage() {
         <>
           <GettingStarted username={member.username} />
 
-          <section className="panel">
+          <ProfileCompleteness
+            displayName={portfolio.displayName}
+            tagline={portfolio.tagline}
+            bio={portfolio.bio}
+            projectsCount={portfolio.projects.length}
+            socialLinksCount={portfolio.socialLinks.length}
+            published={portfolio.published}
+          />
+
+          <section className="panel" id="publish-toggle">
             <UsernameForm currentUsername={member.username} />
 
             <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
@@ -181,7 +192,7 @@ export default async function DashboardPage() {
 
           {stats && <ViewsPanel stats={stats} />}
 
-          <div>
+          <div id="studio">
             <h2>Studio</h2>
             <p style={{ marginTop: 4 }}>
               Everything below — theme and canvas — edits one live preview instantly. Nothing saves until you press Save.
@@ -215,23 +226,61 @@ function ViewsPanel({ stats }: { stats: PortfolioStats }) {
           Counted from real visits to your published page — link-preview bots and crawlers are filtered out.
         </p>
       </div>
-      <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+      <div className={styles.statGrid}>
         <Stat label="Total" value={stats.total} />
-        <Stat label="Last 7 days" value={stats.last7d} />
+        <div className={styles.statWithTrend}>
+          <Stat label="Last 7 days" value={stats.last7d} />
+          <TrendBadge current={stats.last7d} previous={stats.prev7d} />
+        </div>
         <Stat label="Last 30 days" value={stats.last30d} />
         <Stat label="Direct" value={stats.direct} />
         <Stat label="Via QR" value={stats.qr} />
       </div>
       {stats.total > 0 && <ViewsChart daily={stats.daily} />}
+      <SourceSplitBar direct={stats.direct} qr={stats.qr} />
     </section>
   );
 }
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <span style={{ fontSize: "1.5rem", fontWeight: 800, lineHeight: 1 }}>{value}</span>
-      <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{label}</span>
+    <div className={styles.statTile}>
+      <span className={styles.statValue}>{value}</span>
+      <span className={styles.statLabel}>{label}</span>
+    </div>
+  );
+}
+
+function TrendBadge({ current, previous }: { current: number; previous: number }) {
+  if (current === 0 && previous === 0) return null;
+  const deltaPct = previous === 0 ? null : Math.round(((current - previous) / previous) * 100);
+  const up = current >= previous;
+  return (
+    <span className={`${styles.trendBadge} ${up ? styles.trendUp : styles.trendDown}`}>
+      {up ? <ChevronUpIcon size={11} /> : <ChevronDownIcon size={11} />}
+      {deltaPct === null ? "new" : `${Math.abs(deltaPct)}%`}
+    </span>
+  );
+}
+
+function SourceSplitBar({ direct, qr }: { direct: number; qr: number }) {
+  const total = direct + qr;
+  if (total === 0) return null;
+  const directPct = Math.round((direct / total) * 100);
+  return (
+    <div>
+      <div className={styles.splitBar}>
+        <div className={styles.splitSegmentDirect} style={{ width: `${directPct}%` }} />
+        <div className={styles.splitSegmentQr} style={{ width: `${100 - directPct}%` }} />
+      </div>
+      <div className={styles.splitLegend}>
+        <span>
+          <i className={`${styles.legendDot} ${styles.legendDotDirect}`} /> Direct {directPct}%
+        </span>
+        <span>
+          <i className={`${styles.legendDot} ${styles.legendDotQr}`} /> QR {100 - directPct}%
+        </span>
+      </div>
     </div>
   );
 }
@@ -241,29 +290,77 @@ function Stat({ label, value }: { label: string; value: number }) {
 // <title> element in the tree, not just the document head's, which
 // silently killed SVG-native hover tooltips. A real `title` attribute
 // on an HTML element has no such ambiguity and works everywhere.
+//
+// Zero-count days render as a flat, muted bar sitting on a visible
+// baseline rather than a scaled-down copy of the filled style — with
+// sparse data (a handful of views concentrated on one day) that used
+// to make the one real day look like a stray floating box instead of
+// the peak of an otherwise-flat chart.
 function ViewsChart({ daily }: { daily: { date: string; count: number }[] }) {
   const max = Math.max(1, ...daily.map((d) => d.count));
 
   return (
-    <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 56, marginTop: 4 }}>
+    <div className={styles.chartWrap}>
       {daily.map((d) => {
-        const pct = Math.max(4, Math.round((d.count / max) * 100));
+        const isEmpty = d.count === 0;
+        const pct = isEmpty ? 0 : Math.max(12, Math.round((d.count / max) * 100));
         return (
           <div
             key={d.date}
             title={`${d.date}: ${d.count} view${d.count === 1 ? "" : "s"}`}
-            style={{
-              flex: 1,
-              height: `${pct}%`,
-              minHeight: 2,
-              borderRadius: 2,
-              background: "var(--accent)",
-              opacity: d.count === 0 ? 0.15 : 0.85,
-            }}
+            className={`${styles.chartBar} ${isEmpty ? styles.chartBarEmpty : styles.chartBarFilled}`}
+            style={isEmpty ? undefined : { height: `${pct}%` }}
           />
         );
       })}
     </div>
+  );
+}
+
+// Always visible, no dismiss state — same precedent as GettingStarted
+// below (a plain always-shown panel, not a dismiss-and-remember one),
+// simplest thing that nudges an incomplete profile without extra
+// state to track.
+function ProfileCompleteness({
+  displayName,
+  tagline,
+  bio,
+  projectsCount,
+  socialLinksCount,
+  published,
+}: {
+  displayName: string | null;
+  tagline: string | null;
+  bio: string | null;
+  projectsCount: number;
+  socialLinksCount: number;
+  published: boolean;
+}) {
+  const items = [
+    { label: "Profile info (name, tagline, bio)", done: !!(displayName && tagline && bio), href: "#studio" },
+    { label: "At least one project", done: projectsCount > 0, href: "#studio" },
+    { label: "A social link", done: socialLinksCount > 0, href: "#studio" },
+    { label: "Published", done: published, href: "#publish-toggle" },
+  ];
+  const doneCount = items.filter((i) => i.done).length;
+
+  return (
+    <section className="panel">
+      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <h3>Profile checklist</h3>
+        <p style={{ margin: 0, fontSize: "0.85rem" }}>
+          {doneCount} of {items.length} complete
+        </p>
+      </div>
+      <ul className={styles.checklist}>
+        {items.map((item) => (
+          <li key={item.label} className={styles.checklistItem}>
+            {item.done ? <CheckIcon size={15} className={styles.checklistDone} /> : <span className={styles.checklistCircle} />}
+            {item.done ? <span>{item.label}</span> : <a href={item.href}>{item.label}</a>}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

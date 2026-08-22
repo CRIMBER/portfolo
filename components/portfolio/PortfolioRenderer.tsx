@@ -13,6 +13,7 @@ import { Magnetic } from "./Magnetic";
 import { Ripple } from "./Ripple";
 import { PopOnClick } from "./PopOnClick";
 import { ScrollbarTheme } from "./ScrollbarTheme";
+import { BackgroundMusic } from "./BackgroundMusic";
 import { CanvasLayer } from "@/components/canvas/CanvasLayer";
 import type { CanvasElementData } from "@/lib/canvas/schema";
 import { IntroOverlay } from "@/components/intro/IntroOverlay";
@@ -287,6 +288,9 @@ export function PortfolioRenderer({
     <div className={pageClassName} style={themeToStyle(theme)}>
       <link key={googleFontsHref(theme)} rel="stylesheet" href={googleFontsHref(theme)} />
       {fullHeight && <ScrollbarTheme thumb={theme.colors.primary} track={theme.colors.surface} />}
+      {fullHeight && theme.music.url && (
+        <BackgroundMusic url={theme.music.url} volume={theme.music.volume} autoplay={theme.music.autoplay} />
+      )}
       {fullHeight && activeIntro && (
         <IntroOverlay
           presetId={activeIntro.presetId}

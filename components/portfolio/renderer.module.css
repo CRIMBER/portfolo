@@ -763,3 +763,32 @@
     transition: none;
   }
 }
+
+.musicToggle {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 40;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--tc-color-primary);
+  background: var(--tc-color-surface);
+  color: var(--tc-color-primary);
+  box-shadow: 0 6px 20px -6px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    background 200ms ease,
+    color 200ms ease;
+}
+.musicToggle:hover {
+  background: var(--tc-color-primary);
+  color: var(--tc-color-background);
+}
+.musicToggle:active {
+  transform: scale(0.94);
+}

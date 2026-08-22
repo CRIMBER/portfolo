@@ -13,7 +13,7 @@ import { INTRO_PRESET_IDS, INTRO_PRESET_LABELS, QR_INTRO_PRESET_IDS, QR_INTRO_PR
 import { CloseIcon, PlayIcon } from "@/components/icons";
 import { IntroOverlay } from "@/components/intro/IntroOverlay";
 import { PortfolioRenderer, type PortfolioProject, type PortfolioSocialLink } from "@/components/portfolio/PortfolioRenderer";
-import { saveThemeConfig, saveCanvasElements, uploadBackgroundImage, uploadCanvasImage } from "./actions";
+import { saveThemeConfig, saveCanvasElements, uploadBackgroundImage, uploadCanvasImage, uploadMusicFile } from "./actions";
 import { saveProfile, saveProjects, saveSocialLinks } from "./content-actions";
 import { splitList, type EditableProfile, type EditableProject, type EditableSocialLink } from "./content-types";
 import { ProfilePanel } from "./ProfilePanel";
@@ -138,6 +138,7 @@ export function PortfolioStudio({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [uploadingMusic, setUploadingMusic] = useState(false);
   const [previewingIntro, setPreviewingIntro] = useState(false);
   const [previewingQrIntro, setPreviewingQrIntro] = useState(false);
   const [widgetKindToAdd, setWidgetKindToAdd] = useState<WidgetKind>("stat");
@@ -243,6 +244,11 @@ export function PortfolioStudio({
     setTheme((t) => ({ ...t, reel: { ...t.reel, ...patch } }));
   }
 
+  function updateMusic(patch: Partial<ThemeConfig["music"]>) {
+    touch();
+    setTheme((t) => ({ ...t, music: { ...t.music, ...patch } }));
+  }
+
   function updateAnimation(target: AnimationTarget, presetId: string | null, intensity: AnimationIntensity) {
     touch();
     setTheme((t) => {
@@ -284,6 +290,25 @@ export function PortfolioStudio({
     }
     touch();
     setTheme((t) => ({ ...t, background: { kind: "image", value: result.url! } }));
+  }
+
+  async function handleMusicFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadingMusic(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    const result = await uploadMusicFile(formData);
+    setUploadingMusic(false);
+    event.target.value = "";
+
+    if (result.error || !result.url) {
+      setStatus({ kind: "error", message: result.error ?? "Upload failed." });
+      return;
+    }
+    touch();
+    setTheme((t) => ({ ...t, music: { ...t.music, url: result.url! } }));
   }
 
   // ---- canvas builder handlers ----
@@ -688,6 +713,47 @@ export function PortfolioStudio({
           Current: {theme.background.kind}
           {theme.background.kind === "image" ? ` (${theme.background.value})` : ""}
         </p>
+      </section>
+
+      <section className="panel">
+        <div className={themeStyles.panelHeader}>
+          <h3>Background music</h3>
+          <p>A song that plays while a visitor is on your published page. They can pause it any time.</p>
+        </div>
+        <div className={themeStyles.backgroundRow}>
+          <label className={themeStyles.fileLabel}>
+            <input
+              type="file"
+              accept="audio/mpeg,audio/mp3,audio/wav,audio/ogg"
+              onChange={handleMusicFileChange}
+              disabled={uploadingMusic}
+            />
+          </label>
+          {uploadingMusic && <span className="badge">Uploading…</span>}
+          {theme.music.url && (
+            <button type="button" className="btn-secondary" data-tone="danger" onClick={() => updateMusic({ url: null })}>
+              Remove song
+            </button>
+          )}
+        </div>
+        <p className={themeStyles.hint}>Current: {theme.music.url ?? "None"}</p>
+        <div className={themeStyles.controlsRow}>
+          <label className={themeStyles.controlField}>
+            <input type="checkbox" checked={theme.music.autoplay} onChange={(e) => updateMusic({ autoplay: e.target.checked })} />{" "}
+            Autoplay
+          </label>
+          <label className={themeStyles.controlField}>
+            Volume ({Math.round(theme.music.volume * 100)}%)
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={theme.music.volume}
+              onChange={(e) => updateMusic({ volume: Number(e.target.value) })}
+            />
+          </label>
+        </div>
       </section>
       </>)}
 

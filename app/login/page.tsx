@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
+import { Logo } from "@/components/Logo";
+import styles from "./login.module.css";
 
 export default async function LoginPage() {
   const session = await auth();
@@ -8,8 +10,15 @@ export default async function LoginPage() {
   }
 
   return (
-    <main className="narrow">
-      <div className="panel">
+    <main className={`narrow ${styles.loginMain}`}>
+      <div className={styles.blobs} aria-hidden="true">
+        <span className={styles.blobOne} />
+        <span className={styles.blobTwo} />
+      </div>
+      <div className={`panel ${styles.panelEntrance}`}>
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <Logo size={44} />
+        </div>
         <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: 4 }}>
           <h1 className="gradientText">Sign in</h1>
           <p>Access your portfolio dashboard.</p>

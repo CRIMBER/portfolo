@@ -129,6 +129,18 @@ const reelConfig = z
   })
   .default({ enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 });
 
+// Defaulted like reel/intro/qrIntro above: themeConfigs saved before
+// background music existed won't have this field. `url` is an
+// unvalidated string, not `.url()` — uploaded tracks are site-relative
+// paths like /uploads/music/xxx.mp3, not absolute URLs.
+const musicConfig = z
+  .object({
+    url: z.string().nullable(),
+    volume: z.number().min(0).max(1),
+    autoplay: z.boolean(),
+  })
+  .default({ url: null, volume: 0.5, autoplay: true });
+
 const themeConfigSchema = z.object({
   personality: designPersonality,
   colors: colorConfig,
@@ -143,6 +155,7 @@ const themeConfigSchema = z.object({
   intro: introConfig,
   qrIntro: qrIntroConfig,
   reel: reelConfig,
+  music: musicConfig,
 }) satisfies z.ZodType<ThemeConfig>;
 
 // Portfolio.themeConfig is stored as untyped Json — this is the one

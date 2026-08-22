@@ -138,6 +138,18 @@ export interface ReelConfig {
   autoAdvanceMs: number; // 0 = manual navigation only
 }
 
+// A single background-audio track a member can upload for their
+// public page. Autoplay is best-effort, not guaranteed — browsers
+// block unmuted autoplay without prior user interaction (see
+// components/portfolio/BackgroundMusic.tsx), so this is a preference
+// the render layer tries to honor, never something the page depends
+// on.
+export interface MusicConfig {
+  url: string | null;
+  volume: number; // 0–1
+  autoplay: boolean;
+}
+
 export interface ThemeConfig {
   personality: DesignPersonality;
   colors: ColorConfig;
@@ -152,4 +164,5 @@ export interface ThemeConfig {
   intro: IntroConfig;
   qrIntro: QrIntroConfig;
   reel: ReelConfig;
+  music: MusicConfig;
 }
