@@ -108,6 +108,12 @@ export const glassPreset: ThemeConfig = {
     presets: [
       { target: "parallax", presetId: "layered-drift", intensity: "smooth" },
       { target: "cardMovement", presetId: "float", intensity: "calm" },
+      // Genuine glassmorphism needs something with real texture behind
+      // the blurred card, or backdrop-filter just softens a flat
+      // gradient into... a slightly softer flat gradient. Three slow
+      // drifting color blobs (in the theme's own primary/secondary/
+      // accent) give the blur actual light and color to distort.
+      { target: "background", presetId: "aurora", intensity: "smooth" },
     ],
   },
   layout: { heroAlign: "center" },
