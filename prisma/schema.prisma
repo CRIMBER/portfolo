@@ -1,0 +1,230 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MemberStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REVOKED
+}
+
+enum SectionType {
+  HERO
+  ABOUT
+  PROJECTS
+  SKILLS
+  EXPERIENCE
+  RESEARCH
+  ACHIEVEMENTS
+  GALLERY
+  MEDIA
+  SOCIAL
+  CONTACT
+  CUSTOM
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  AUDIO
+}
+
+enum CanvasElementType {
+  TEXT
+  IMAGE
+}
+
+enum SocialPlatform {
+  INSTAGRAM
+  GITHUB
+  LINKEDIN
+  X
+  YOUTUBE
+  BEHANCE
+  DRIBBBLE
+  WEBSITE
+  EMAIL
+  CUSTOM
+}
+
+// A Google-authenticated account. Signing in creates this row with
+// status PENDING — it does NOT grant a member role by itself. Every
+// mutating route must check status == APPROVED server-side.
+model Member {
+  id        String       @id @default(cuid())
+  googleId  String       @unique
+  email     String       @unique
+  username  String?      @unique
+  status    MemberStatus @default(PENDING)
+  isOwner   Boolean      @default(false)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  portfolio Portfolio?
+
+  @@index([status])
+}
+
+// One portfolio per member. stableSlug is what the QR code actually
+// encodes — it never changes, even if the member renames their
+// username — so a printed QR code never goes dead.
+model Portfolio {
+  id           String   @id @default(cuid())
+  memberId     String   @unique
+  member       Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  stableSlug   String   @unique @default(cuid())
+  displayName  String?
+  tagline      String?
+  bio          String?
+  aboutLong    String?
+
+  published    Boolean  @default(false)
+  showCrew     Boolean  @default(false)
+
+  // ThemeConfig JSON — validated against lib/theme/schema.ts at the
+  // application layer, not enforced by the DB.
+  themeConfig  Json
+  sectionOrder Json     // string[] of Section ids, display order
+
+  sections       Section[]
+  projects       Project[]
+  socialLinks    SocialLink[]
+  media          Media[]
+  canvasElements CanvasElement[]
+  pageViews      PageView[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+enum ViewSource {
+  DIRECT
+  QR
+}
+
+// One row per real (non-bot) page load — see lib/analytics.ts for the
+// bot filter and the /p/[stableSlug] -> /@username?src=qr flow that
+// tells DIRECT and QR traffic apart. Deliberately just a timestamp +
+// source, no IP/UA/referrer stored — enough for the dashboard's view
+// counts and daily chart without keeping anything identifying.
+model PageView {
+  id          String     @id @default(cuid())
+  portfolioId String
+  portfolio   Portfolio  @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  source      ViewSource
+  createdAt   DateTime   @default(now())
+
+  @@index([portfolioId, createdAt])
+}
+
+// A freely-positioned element in the optional canvas layer (see
+// ThemeConfig.canvasMode in lib/theme/schema.ts) — the "add text and
+// pictures anywhere, animate them" layer on top of / instead of the
+// structured page. x/width are percentages of the canvas's fluid
+// width; y/height/rotation are pixels/degrees within the canvas's
+// fixed-height box, since only the width is responsive.
+model CanvasElement {
+  id          String            @id @default(cuid())
+  portfolioId String
+  portfolio   Portfolio         @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  type        CanvasElementType
+  content     String            // text content, or an uploaded image URL
+
+  xPct        Float
+  yPx         Float
+  widthPct    Float
+  heightPx    Float
+  rotationDeg Float             @default(0)
+  zIndex      Int               @default(0)
+
+  // Bounded, app-validated style/animation config — same "no
+  // arbitrary code" boundary as ThemeConfig.animation: a member picks
+  // a presetId from lib/canvas/animation-registry.ts, never supplies
+  // real code. See lib/canvas/validate.ts.
+  style       Json
+  animations  Json
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([portfolioId])
+}
+
+model Section {
+  id          String      @id @default(cuid())
+  portfolioId String
+  portfolio   Portfolio   @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  type        SectionType
+  customName  String?     // e.g. "Projects" renamed to "Things I Built"
+  content     Json
+  order       Int
+  visible     Boolean     @default(true)
+
+  @@index([portfolioId])
+}
+
+model Project {
+  id            String    @id @default(cuid())
+  portfolioId   String
+  portfolio     Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  title         String
+  description   String?
+  date          DateTime?
+  role          String?
+  technologies  String[]
+  githubUrl     String?
+  demoUrl       String?
+  researchUrl   String?
+  collaborators String[]
+  order         Int
+
+  media         Media[]
+
+  @@index([portfolioId])
+}
+
+model Media {
+  id               String     @id @default(cuid())
+  portfolioId      String?
+  portfolio        Portfolio? @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  projectId        String?
+  project          Project?   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  type             MediaType
+  url              String
+  // Videos only. Read client-side from the uploaded file's own
+  // metadata (see ProjectsPanel.tsx) — best-effort for a duration
+  // badge in the editor, not a server-enforced cap; without ffprobe
+  // there's no reliable server-side way to verify it, so the actual
+  // guard against oversized uploads is uploadProjectMedia's file-size
+  // limit instead.
+  durationSeconds  Float?
+  order            Int        @default(0)
+
+  createdAt        DateTime   @default(now())
+
+  @@index([portfolioId])
+  @@index([projectId])
+}
+
+model SocialLink {
+  id          String         @id @default(cuid())
+  portfolioId String
+  portfolio   Portfolio      @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  platform    SocialPlatform
+  url         String
+
+  @@index([portfolioId])
+}

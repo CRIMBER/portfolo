@@ -1,0 +1,136 @@
+/* Visual implementations for each WidgetKind (see lib/canvas/schema.ts).
+   Sizing is all in `em` so it scales with the element's own
+   textStyle.fontSizePx, set as the `font-size` on the wrapping element
+   in CanvasElementView. */
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  gap: 0.15em;
+}
+.statValue {
+  font-size: 2.2em;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.statLabel {
+  font-size: 0.75em;
+  opacity: 0.75;
+  font-weight: 500;
+}
+
+.skillbars {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  gap: 0.65em;
+}
+.skillRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+}
+.skillLabelRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7em;
+  font-weight: 600;
+}
+.skillTrack {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 18%, transparent);
+  overflow: hidden;
+}
+.skillFill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.statusWrap {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  font-size: 0.85em;
+  font-weight: 600;
+  padding: 0.5em 1em;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+.statusDot {
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  animation: widgetPulse 1.8s ease-out infinite;
+}
+@keyframes widgetPulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--dot-color, currentColor) 55%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 8px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.marqueeWrap {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+}
+.marqueeTrack {
+  display: flex;
+  width: max-content;
+  white-space: nowrap;
+  animation-name: widgetMarquee;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.marqueeItem {
+  padding-right: 2.5em;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+@keyframes widgetMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marqueeStatic {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .statusDot {
+    animation: none;
+  }
+  .marqueeTrack {
+    animation: none;
+  }
+}

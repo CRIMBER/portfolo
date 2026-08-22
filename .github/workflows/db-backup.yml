@@ -1,0 +1,69 @@
+name: Database backup
+
+# No Railway backup on the free/hobby plan (Pro-only feature — see
+# the Postgres service's own Backups tab), so this is the free
+# substitute: a scheduled pg_dump committed to its own branch in this
+# repo. Real, versioned, restorable files — not tied to Railway at
+# all, so it survives even if the Railway project itself is ever
+# deleted or misconfigured.
+on:
+  schedule:
+    - cron: "17 3 * * *" # 03:17 UTC daily
+  workflow_dispatch: {} # lets you trigger one manually from the Actions tab, for testing
+
+permissions:
+  contents: write
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Switch to the backups branch (creating it on first run)
+        run: |
+          git fetch origin backups:backups || true
+          git checkout backups 2>/dev/null || git checkout --orphan backups
+
+      # ubuntu-latest's default apt repo only has postgresql-client 16,
+      # but Railway's Postgres is v18 — pg_dump refuses to dump from a
+      # server newer than itself, so pull the client from PGDG instead.
+      - name: Install postgresql-client (v18, from PGDG)
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          sudo sh -c 'echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(. /etc/os-release && echo $VERSION_CODENAME)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-18
+
+      - name: Dump the database
+        env:
+          DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+        run: |
+          mkdir -p backups
+          # Called by full path, not just "pg_dump" — the runner's
+          # postgresql-client-common wrapper still resolves the bare
+          # command to the old preinstalled v16 even with v18 present.
+          /usr/lib/postgresql/18/bin/pg_dump "$DATABASE_URL" --format=custom --file="backups/$(date -u +%Y-%m-%dT%H-%M-%SZ).dump"
+
+      - name: Prune backups older than 30 days
+        run: |
+          cutoff=$(date -u -d '30 days ago' +%Y-%m-%d)
+          for f in backups/*.dump; do
+            [ -e "$f" ] || continue
+            fname=$(basename "$f")
+            fdate=${fname:0:10}
+            if [[ "$fdate" < "$cutoff" ]]; then
+              git rm -q "$f"
+            fi
+          done
+
+      - name: Commit and push
+        run: |
+          git config user.name "backup-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add backups/
+          git commit -m "Backup $(date -u +%Y-%m-%d)" || echo "Nothing to commit"
+          git push origin backups
