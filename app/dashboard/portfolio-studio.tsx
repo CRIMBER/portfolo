@@ -10,6 +10,7 @@ import { decodeWidget, defaultImageStyle, defaultTextStyle, defaultWidgetData, e
 import { ENTRANCE_PRESET_IDS, HOVER_PRESET_IDS, SCROLL_PRESET_IDS } from "@/lib/canvas/animation-registry";
 import { CanvasWidget } from "@/components/canvas/CanvasWidget";
 import { INTRO_PRESET_IDS, INTRO_PRESET_LABELS, QR_INTRO_PRESET_IDS, QR_INTRO_PRESET_LABELS } from "@/lib/intro/registry";
+import { CloseIcon, PlayIcon } from "@/components/icons";
 import { IntroOverlay } from "@/components/intro/IntroOverlay";
 import { PortfolioRenderer, type PortfolioProject, type PortfolioSocialLink } from "@/components/portfolio/PortfolioRenderer";
 import { saveThemeConfig, saveCanvasElements, uploadBackgroundImage, uploadCanvasImage } from "./actions";
@@ -22,6 +23,21 @@ import themeStyles from "./theme-studio.module.css";
 import canvasStyles from "./canvas-studio.module.css";
 
 type ColorKey = "primary" | "secondary" | "accent" | "background" | "text" | "textMuted";
+
+// Grouping the Studio's ~12 panels into tabs — and pulling Live
+// preview into its own sticky sidebar column (see the layout wrapper
+// below) — is a direct response to the Studio having grown into one
+// long wall of scrolling, with the preview buried at the very bottom
+// of it. Content isn't split any further than these four groups so a
+// member still only ever has to think about one boundary ("where do
+// I go for X") rather than a deep nested menu.
+type StudioTab = "content" | "theme" | "effects" | "canvas";
+const STUDIO_TABS: { id: StudioTab; label: string }[] = [
+  { id: "content", label: "Content" },
+  { id: "theme", label: "Theme" },
+  { id: "effects", label: "Effects" },
+  { id: "canvas", label: "Canvas" },
+];
 
 interface PortfolioStudioProps {
   initialTheme: ThemeConfig;
@@ -129,6 +145,7 @@ export function PortfolioStudio({
     kind: "idle",
   });
   const [dirty, setDirty] = useState(false);
+  const [activeTab, setActiveTab] = useState<StudioTab>("content");
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const surface = parseColor(theme.colors.surface);
@@ -463,11 +480,31 @@ export function PortfolioStudio({
   }
 
   return (
-    <div className={themeStyles.studio}>
+    <div className={themeStyles.studioLayout}>
+      <div className={themeStyles.studioMain}>
+        <div className={themeStyles.tabBar} role="tablist">
+          {STUDIO_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              className={`btn-secondary ${themeStyles.tabButton}`}
+              data-active={activeTab === tab.id}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+      {activeTab === "content" && (<>
       <ProfilePanel value={profile} onChange={(patch) => { touch(); setProfile((p) => ({ ...p, ...patch })); }} />
       <ProjectsPanel projects={projects} onChange={(next) => { touch(); setProjects(next); }} />
       <SocialLinksPanel links={socialLinks} onChange={(next) => { touch(); setSocialLinks(next); }} />
+      </>)}
 
+      {activeTab === "theme" && (<>
       <section className="panel">
         <div className={themeStyles.panelHeader}>
           <h3>Starting point</h3>
@@ -652,7 +689,9 @@ export function PortfolioStudio({
           {theme.background.kind === "image" ? ` (${theme.background.value})` : ""}
         </p>
       </section>
+      </>)}
 
+      {activeTab === "effects" && (<>
       <section className="panel">
         <div className={themeStyles.panelHeader}>
           <h3>Animations</h3>
@@ -743,7 +782,7 @@ export function PortfolioStudio({
             disabled={!theme.intro.presetId || previewingIntro}
             onClick={() => setPreviewingIntro(true)}
           >
-            {previewingIntro ? "Playing…" : "▶ Preview"}
+            {previewingIntro ? "Playing…" : (<><PlayIcon size={12} /> Preview</>)}
           </button>
         </div>
       </section>
@@ -782,7 +821,7 @@ export function PortfolioStudio({
             disabled={!theme.qrIntro.presetId || previewingQrIntro}
             onClick={() => setPreviewingQrIntro(true)}
           >
-            {previewingQrIntro ? "Playing…" : "▶ Preview"}
+            {previewingQrIntro ? "Playing…" : (<><PlayIcon size={12} /> Preview</>)}
           </button>
         </div>
       </section>
@@ -790,7 +829,7 @@ export function PortfolioStudio({
       <section className="panel">
         <div className={themeStyles.panelHeader}>
           <h3>Showcase reel</h3>
-          <p>A &ldquo;▶ Watch reel&rdquo; button visitors can click to step through your projects full-screen. Needs 2+ projects.</p>
+          <p>A &ldquo;Watch reel&rdquo; button visitors can click to step through your projects full-screen. Needs 2+ projects.</p>
         </div>
         <div className={themeStyles.controlsRow}>
           <label className={themeStyles.controlField}>
@@ -851,7 +890,9 @@ export function PortfolioStudio({
           onDone={() => setPreviewingQrIntro(false)}
         />
       )}
+      </>)}
 
+      {activeTab === "canvas" && (<>
       <section className="panel">
         <div className={canvasStyles.panelHeader}>
           <h3>Canvas builder</h3>
@@ -1172,42 +1213,46 @@ export function PortfolioStudio({
           </div>
         </section>
       )}
+      </>)}
 
-      <section className="panel">
-        <div className={themeStyles.panelHeader}>
-          <h3>Live preview</h3>
-          <p>Same renderer as the public page — updates instantly as you edit anything above, theme or canvas.</p>
+        <div className={themeStyles.saveBar}>
+          <button type="button" onClick={handleSave} disabled={status.kind === "saving"}>
+            {status.kind === "saving" ? "Saving…" : "Save"}
+          </button>
+          {status.kind === "saved" && (
+            <span className="badge" data-tone="success">
+              Saved
+            </span>
+          )}
+          {status.kind === "error" && (
+            <span className="badge" data-tone="danger">
+              {status.message}
+            </span>
+          )}
         </div>
-        <div className={themeStyles.previewFrame}>
-          <PortfolioRenderer
-            theme={theme}
-            handle={handle}
-            displayName={profile.displayName || null}
-            tagline={profile.tagline || null}
-            bio={profile.bio || null}
-            aboutLong={profile.aboutLong || null}
-            projects={projects.map(toRenderProject)}
-            socialLinks={socialLinks}
-            canvasElements={elements}
-            fullHeight={false}
-          />
-        </div>
-      </section>
+      </div>
 
-      <div className={themeStyles.saveBar}>
-        <button type="button" onClick={handleSave} disabled={status.kind === "saving"}>
-          {status.kind === "saving" ? "Saving…" : "Save"}
-        </button>
-        {status.kind === "saved" && (
-          <span className="badge" data-tone="success">
-            Saved
-          </span>
-        )}
-        {status.kind === "error" && (
-          <span className="badge" data-tone="danger">
-            {status.message}
-          </span>
-        )}
+      <div className={themeStyles.studioPreview}>
+        <div className={themeStyles.previewSticky}>
+          <div className={themeStyles.panelHeader}>
+            <h3>Live preview</h3>
+            <p>Same renderer as the public page — updates instantly as you edit anything, theme or canvas.</p>
+          </div>
+          <div className={themeStyles.previewFrame}>
+            <PortfolioRenderer
+              theme={theme}
+              handle={handle}
+              displayName={profile.displayName || null}
+              tagline={profile.tagline || null}
+              bio={profile.bio || null}
+              aboutLong={profile.aboutLong || null}
+              projects={projects.map(toRenderProject)}
+              socialLinks={socialLinks}
+              canvasElements={elements}
+              fullHeight={false}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1369,7 +1414,7 @@ function WidgetInspector({
                 onClick={() => patch({ ...payload, data: { skills: payload.data.skills.filter((_, si) => si !== i) } })}
                 aria-label="Remove skill"
               >
-                ×
+                <CloseIcon size={13} />
               </button>
             </div>
           ))}
@@ -1509,7 +1554,7 @@ function EditableElement({
             onClick={onDelete}
             aria-label="Delete element"
           >
-            ×
+            <CloseIcon size={11} />
           </button>
           <div className={canvasStyles.resizeHandle} onPointerDown={(e) => beginDrag(e, "resize")} onPointerMove={onPointerMove} onPointerUp={endDrag} />
           <div className={canvasStyles.rotateHandle} onPointerDown={(e) => beginDrag(e, "rotate")} onPointerMove={onPointerMove} onPointerUp={endDrag} />

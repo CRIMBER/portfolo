@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type TouchEvent } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { entranceMotionProps } from "@/lib/canvas/animation-registry";
+import { ChevronLeftIcon, ChevronRightIcon, CloseIcon, PauseIcon, PlayIcon } from "@/components/icons";
 import type { PortfolioProject } from "./PortfolioRenderer";
 import styles from "./renderer.module.css";
 
@@ -73,7 +74,7 @@ export function ShowcaseReel({
   return (
     <>
       <button type="button" className={styles.reelTrigger} onClick={() => { setOpen(true); setIndex(0); setPaused(false); }}>
-        ▶ Watch reel
+        <PlayIcon size={13} /> Watch reel
       </button>
 
       <AnimatePresence>
@@ -107,15 +108,18 @@ export function ShowcaseReel({
                 right: 12,
                 background: "none",
                 border: "none",
+                boxShadow: "none",
                 color: textColor,
-                fontSize: "1.6rem",
                 cursor: "pointer",
                 padding: 14,
                 minWidth: 44,
                 minHeight: 44,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              ×
+              <CloseIcon size={22} />
             </button>
 
             <div style={{ display: "flex", alignItems: "center", gap: 24, width: "100%", maxWidth: 640 }}>
@@ -197,8 +201,24 @@ export function ShowcaseReel({
             </div>
 
             {autoAdvanceMs > 0 && (
-              <button type="button" onClick={() => setPaused((p) => !p)} style={{ marginTop: 12, background: "none", border: "none", color: mutedColor, fontSize: "0.8rem", cursor: "pointer" }}>
-                {paused ? "▶ Resume" : "⏸ Pause"}
+              <button
+                type="button"
+                onClick={() => setPaused((p) => !p)}
+                style={{
+                  marginTop: 12,
+                  background: "none",
+                  border: "none",
+                  boxShadow: "none",
+                  color: mutedColor,
+                  fontSize: "0.8rem",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                {paused ? <PlayIcon size={12} /> : <PauseIcon size={12} />}
+                {paused ? "Resume" : "Pause"}
               </button>
             )}
           </motion.div>
@@ -217,17 +237,19 @@ function NavArrow({ direction, color, onClick }: { direction: "prev" | "next"; c
       style={{
         background: "none",
         border: "none",
+        boxShadow: "none",
         color,
-        fontSize: "clamp(1.4rem, 6vw, 2rem)",
         cursor: "pointer",
         padding: 12,
         minWidth: 44,
         minHeight: 44,
-        lineHeight: 1,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         flexShrink: 0,
       }}
     >
-      {direction === "prev" ? "‹" : "›"}
+      {direction === "prev" ? <ChevronLeftIcon size={26} /> : <ChevronRightIcon size={26} />}
     </button>
   );
 }

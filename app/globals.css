@@ -1,46 +1,50 @@
 :root {
-  --bg: #f6f6f8;
+  --bg: #f6f6fb;
   --surface: #ffffff;
-  --surface-2: #f0f0f3;
-  --border: #e2e2e6;
-  --text: #16161a;
-  --text-muted: #6b6b76;
-  --accent: #3452ff;
-  --accent-soft: #e8ebff;
+  --surface-2: #f1f1f8;
+  --border: #e3e3ee;
+  --text: #131318;
+  --text-muted: #6b6b7c;
+  --accent: #5850ec;
+  --accent-2: #8b5cf6;
+  --accent-soft: #edebfe;
   --accent-text: #ffffff;
-  --danger: #d1293d;
-  --danger-soft: #fbe7e9;
-  --success: #1a8a4a;
-  --success-soft: #e3f5e9;
-  --warning: #a5690a;
-  --warning-soft: #fbedd8;
+  --danger: #dc2645;
+  --danger-soft: #fdecf0;
+  --success: #12875a;
+  --success-soft: #e2f8ee;
+  --warning: #ab6a04;
+  --warning-soft: #fdf0d9;
 
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
-  --shadow-sm: 0 1px 2px rgba(16, 16, 20, 0.05), 0 1px 1px rgba(16, 16, 20, 0.03);
-  --shadow-md: 0 8px 24px rgba(16, 16, 20, 0.08);
+  --radius-sm: 9px;
+  --radius-md: 13px;
+  --radius-lg: 20px;
+  --shadow-sm: 0 1px 2px rgba(20, 20, 30, 0.05), 0 1px 1px rgba(20, 20, 30, 0.03);
+  --shadow-md: 0 10px 30px rgba(20, 20, 30, 0.08);
+  --shadow-lg: 0 24px 60px rgba(20, 20, 30, 0.16);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0f0f12;
-    --surface: #19191d;
-    --surface-2: #212126;
-    --border: #2c2c33;
-    --text: #f2f2f5;
-    --text-muted: #9a9aa5;
-    --accent: #7c90ff;
-    --accent-soft: #262c4d;
-    --accent-text: #0c0c10;
-    --danger: #ff6b7a;
-    --danger-soft: #3a1c22;
+    --bg: #0a0a0f;
+    --surface: #15151c;
+    --surface-2: #1c1c25;
+    --border: #2a2a36;
+    --text: #f4f4f8;
+    --text-muted: #9797a8;
+    --accent: #8b85ff;
+    --accent-2: #b490ff;
+    --accent-soft: #221f42;
+    --accent-text: #0a0a0f;
+    --danger: #ff6b7f;
+    --danger-soft: #391b23;
     --success: #4ade80;
     --success-soft: #163524;
     --warning: #f5b94d;
     --warning-soft: #3a2c14;
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.45);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 14px 36px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 28px 70px rgba(0, 0, 0, 0.65);
   }
 
   html {
@@ -116,7 +120,19 @@ main.narrow {
 h1 {
   font-size: 1.85rem;
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
+}
+
+/* Opt-in flourish for a page's single hero heading (home, login,
+   directory) — a subtle two-stop gradient using the same accent
+   pair the primary button uses, so it reads as one system rather
+   than a random extra color. Never applied to dashboard/admin
+   headings, which stay plain for readability over flourish. */
+.gradientText {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 h2 {
@@ -219,18 +235,21 @@ button {
   font: inherit;
   font-weight: 600;
   color: var(--accent-text);
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
   border: none;
   border-radius: var(--radius-sm);
   padding: 9px 16px;
   cursor: pointer;
+  box-shadow: 0 1px 2px rgba(20, 20, 30, 0.12);
   transition:
     filter 120ms ease,
     transform 80ms ease,
-    opacity 120ms ease;
+    opacity 120ms ease,
+    box-shadow 160ms ease;
 }
 button:hover {
   filter: brightness(1.08);
+  box-shadow: 0 6px 20px -4px var(--accent);
 }
 button:active {
   transform: scale(0.97);
@@ -240,6 +259,7 @@ button:disabled {
   cursor: not-allowed;
   filter: none;
   transform: none;
+  box-shadow: none;
 }
 
 /* Secondary / chip-style button — opt in with className="btn-secondary".
@@ -271,8 +291,15 @@ button:disabled {
 }
 .btn-secondary[data-active="true"] {
   color: var(--accent-text);
-  background: var(--accent);
-  border-color: var(--accent);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border-color: transparent;
+}
+.btn-secondary[data-tone="danger"] {
+  color: var(--danger);
+  border-color: var(--danger-soft);
+}
+.btn-secondary[data-tone="danger"]:hover {
+  background: var(--danger-soft);
 }
 
 table {
@@ -294,11 +321,20 @@ td {
 
 th {
   color: var(--text-muted);
-  font-weight: 600;
+  font-weight: 700;
   background: var(--surface-2);
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
+}
+
+/* Horizontal-scroll wrapper for any table that might not fit a
+   narrow viewport — className="table-scroll" around the <table>.
+   body already has overflow-x:hidden, so without this an overflowing
+   table silently clips instead of scrolling. */
+.table-scroll {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
 }
 
 tr:last-child td {
@@ -345,6 +381,34 @@ tr:last-child td {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+/* details/summary variant — className="panel" on a <details>
+   (see GettingStarted in app/dashboard/page.tsx). Panel's own
+   display:flex already makes summary+content stack correctly; this
+   just swaps the browser's default disclosure triangle for one drawn
+   with our own icon set, so it matches the rest of the UI's chrome. */
+details.panel summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+details.panel summary::-webkit-details-marker {
+  display: none;
+}
+details.panel summary::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 160ms ease;
+}
+details.panel[open] summary::before {
+  transform: rotate(45deg);
 }
 
 /* Themed scrollbar for the public portfolio page — inert everywhere

@@ -279,13 +279,17 @@ function GettingStarted({ username }: { username: string | null }) {
       <summary style={{ cursor: "pointer", fontWeight: 700 }}>New here? Start here</summary>
       <ol style={{ margin: "12px 0 0", paddingLeft: 20, display: "flex", flexDirection: "column", gap: 8 }}>
         <li>
-          Pick a look — scroll down to <strong>Starting point</strong> in the Studio section and click a style to
-          instantly reskin your whole page. Everything it sets stays fully editable after.
+          Pick a look — in the Studio below, open the <strong>Theme</strong> tab and click a starting style to
+          instantly reskin your whole page (watch it update live in the preview). Everything it sets stays fully
+          editable after.
         </li>
-        <li>Fill in your profile and add your projects (with photos or short video clips) further down.</li>
         <li>
-          Press <strong>Save</strong> at the bottom of the Studio to store your changes, then come back up here and
-          hit <strong>Publish</strong> to make your page live.
+          Switch to the <strong>Content</strong> tab to fill in your profile and add your projects (with photos or
+          short video clips).
+        </li>
+        <li>
+          Press <strong>Save</strong> in the Studio to store your changes, then come back up here and hit{" "}
+          <strong>Publish</strong> to make your page live.
         </li>
         <li>
           Your page lives at <code>/@{username ?? "yourhandle"}</code> — share that link, or hand out the{" "}

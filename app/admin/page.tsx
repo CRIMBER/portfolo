@@ -52,50 +52,52 @@ export default async function AdminPage() {
           No one has signed in yet.
         </div>
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Email</th>
-              <th>Username</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {members.map((m) => (
-              <tr key={m.id} style={m.status === "PENDING" && !m.isOwner ? { background: "var(--warning-soft)" } : undefined}>
-                <td>{m.email}</td>
-                <td>{m.username ?? "—"}</td>
-                <td>
-                  <span className="badge" data-tone={m.isOwner ? "accent" : STATUS_TONE[m.status]}>
-                    {m.isOwner ? "Owner" : m.status}
-                  </span>
-                </td>
-                <td>
-                  {!m.isOwner && (
-                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                      <form action={approveMember.bind(null, m.id)}>
-                        <button type="submit" disabled={m.status === "APPROVED"}>
-                          Approve
-                        </button>
-                      </form>
-                      <form action={rejectMember.bind(null, m.id)}>
-                        <button type="submit" className="btn-secondary" disabled={m.status === "REJECTED"}>
-                          Reject
-                        </button>
-                      </form>
-                      <form action={revokeMember.bind(null, m.id)}>
-                        <button type="submit" className="btn-secondary" disabled={m.status === "REVOKED"}>
-                          Revoke
-                        </button>
-                      </form>
-                    </div>
-                  )}
-                </td>
+        <div className="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Username</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {members.map((m) => (
+                <tr key={m.id} style={m.status === "PENDING" && !m.isOwner ? { background: "var(--warning-soft)" } : undefined}>
+                  <td>{m.email}</td>
+                  <td>{m.username ?? "—"}</td>
+                  <td>
+                    <span className="badge" data-tone={m.isOwner ? "accent" : STATUS_TONE[m.status]}>
+                      {m.isOwner ? "Owner" : m.status}
+                    </span>
+                  </td>
+                  <td>
+                    {!m.isOwner && (
+                      <div style={{ display: "flex", gap: 6, flexWrap: "nowrap" }}>
+                        <form action={approveMember.bind(null, m.id)}>
+                          <button type="submit" disabled={m.status === "APPROVED"}>
+                            Approve
+                          </button>
+                        </form>
+                        <form action={rejectMember.bind(null, m.id)}>
+                          <button type="submit" className="btn-secondary" disabled={m.status === "REJECTED"}>
+                            Reject
+                          </button>
+                        </form>
+                        <form action={revokeMember.bind(null, m.id)}>
+                          <button type="submit" className="btn-secondary" data-tone="danger" disabled={m.status === "REVOKED"}>
+                            Revoke
+                          </button>
+                        </form>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </main>
   );

@@ -2,6 +2,7 @@
 
 import { useState, type ChangeEvent } from "react";
 import { uploadProjectMedia } from "./actions";
+import { ChevronUpIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, CloseIcon } from "@/components/icons";
 import { formatDuration, newLocalId, type EditableMedia, type EditableProject } from "./content-types";
 import { videoThumbnailUrl } from "@/lib/media";
 import styles from "./content-panels.module.css";
@@ -134,7 +135,7 @@ export function ProjectsPanel({ projects, onChange }: ProjectsPanelProps) {
                   onClick={() => move(project.id, -1)}
                   aria-label="Move up"
                 >
-                  ↑
+                  <ChevronUpIcon size={14} />
                 </button>
                 <button
                   type="button"
@@ -143,7 +144,7 @@ export function ProjectsPanel({ projects, onChange }: ProjectsPanelProps) {
                   onClick={() => move(project.id, 1)}
                   aria-label="Move down"
                 >
-                  ↓
+                  <ChevronDownIcon size={14} />
                 </button>
                 <button
                   type="button"
@@ -151,7 +152,7 @@ export function ProjectsPanel({ projects, onChange }: ProjectsPanelProps) {
                   onClick={() => remove(project.id, project.title)}
                   aria-label="Delete project"
                 >
-                  ×
+                  <CloseIcon size={14} />
                 </button>
               </div>
             </div>
@@ -242,7 +243,7 @@ export function ProjectsPanel({ projects, onChange }: ProjectsPanelProps) {
                         onClick={() => moveMedia(project.id, i, -1)}
                         aria-label="Move media earlier"
                       >
-                        ‹
+                        <ChevronLeftIcon size={11} />
                       </button>
                       <button
                         type="button"
@@ -250,10 +251,10 @@ export function ProjectsPanel({ projects, onChange }: ProjectsPanelProps) {
                         onClick={() => moveMedia(project.id, i, 1)}
                         aria-label="Move media later"
                       >
-                        ›
+                        <ChevronRightIcon size={11} />
                       </button>
                       <button type="button" onClick={() => removeMedia(project.id, m.id)} aria-label="Remove media">
-                        ×
+                        <CloseIcon size={11} />
                       </button>
                     </div>
                   </div>

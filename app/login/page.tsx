@@ -11,7 +11,7 @@ export default async function LoginPage() {
     <main className="narrow">
       <div className="panel">
         <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: 4 }}>
-          <h1>Sign in</h1>
+          <h1 className="gradientText">Sign in</h1>
           <p>Access your portfolio dashboard.</p>
         </div>
 

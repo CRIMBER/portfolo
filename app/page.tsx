@@ -6,7 +6,7 @@ export default async function Home() {
   return (
     <main className="narrow">
       <div className="panel" style={{ textAlign: "center", alignItems: "center" }}>
-        <h1>Portfolio Platform</h1>
+        <h1 className="gradientText">Portfolio Platform</h1>
         {session?.member ? (
           <>
             <span className="badge" data-tone="success">

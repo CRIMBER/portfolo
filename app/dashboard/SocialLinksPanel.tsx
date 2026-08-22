@@ -1,6 +1,7 @@
 "use client";
 
 import { newLocalId, SOCIAL_PLATFORMS, type EditableSocialLink } from "./content-types";
+import { CloseIcon } from "@/components/icons";
 import styles from "./content-panels.module.css";
 
 interface SocialLinksPanelProps {
@@ -40,7 +41,7 @@ export function SocialLinksPanel({ links, onChange }: SocialLinksPanelProps) {
             </select>
             <input type="text" value={link.url} placeholder="https://..." onChange={(e) => update(link.id, { url: e.target.value })} />
             <button type="button" className={styles.iconButton} onClick={() => remove(link.id)} aria-label="Delete link">
-              ×
+              <CloseIcon size={14} />
             </button>
           </div>
         ))}

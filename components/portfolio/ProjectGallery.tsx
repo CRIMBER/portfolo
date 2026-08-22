@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type TouchEvent } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import type { PortfolioMedia } from "./PortfolioRenderer";
 import { videoThumbnailUrl } from "@/lib/media";
+import { ChevronLeftIcon, ChevronRightIcon, CloseIcon, PlayIcon } from "@/components/icons";
 import styles from "./renderer.module.css";
 
 const SWIPE_THRESHOLD_PX = 50;
@@ -66,7 +67,11 @@ export function ProjectGallery({ media }: { media: PortfolioMedia[] }) {
             ) : (
               <video src={videoThumbnailUrl(item.url)} muted preload="metadata" />
             )}
-            {item.type === "video" && <span className={styles.mediaPlayBadge}>▶</span>}
+            {item.type === "video" && (
+              <span className={styles.mediaPlayBadge}>
+                <PlayIcon size={18} />
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -102,16 +107,18 @@ export function ProjectGallery({ media }: { media: PortfolioMedia[] }) {
                 right: 12,
                 background: "none",
                 border: "none",
+                boxShadow: "none",
                 color: "#fff",
-                fontSize: "1.8rem",
                 cursor: "pointer",
-                lineHeight: 1,
                 padding: 14,
                 minWidth: 44,
                 minHeight: 44,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              ×
+              <CloseIcon size={24} />
             </button>
 
             {media.length > 1 && (
@@ -127,15 +134,18 @@ export function ProjectGallery({ media }: { media: PortfolioMedia[] }) {
                   left: 4,
                   background: "none",
                   border: "none",
+                  boxShadow: "none",
                   color: "#fff",
-                  fontSize: "clamp(1.8rem, 6vw, 2.2rem)",
                   cursor: "pointer",
                   padding: 16,
                   minWidth: 44,
                   minHeight: 44,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                ‹
+                <ChevronLeftIcon size={30} />
               </button>
             )}
 
@@ -171,15 +181,18 @@ export function ProjectGallery({ media }: { media: PortfolioMedia[] }) {
                   right: 4,
                   background: "none",
                   border: "none",
+                  boxShadow: "none",
                   color: "#fff",
-                  fontSize: "clamp(1.8rem, 6vw, 2.2rem)",
                   cursor: "pointer",
                   padding: 16,
                   minWidth: 44,
                   minHeight: 44,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                ›
+                <ChevronRightIcon size={30} />
               </button>
             )}
           </motion.div>

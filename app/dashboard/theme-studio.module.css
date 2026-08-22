@@ -4,6 +4,75 @@
   gap: 20px;
 }
 
+/* ---- Studio layout: tabbed controls + a sticky live-preview
+   sidebar, so the preview is always visible next to whichever tab is
+   open instead of buried at the bottom of one long scroll. Collapses
+   to a single column on narrow viewports, where the preview just
+   reflows above the controls (order: -1) rather than staying sticky —
+   sticky positioning next to content this tall doesn't help on a
+   phone-sized viewport anyway. ---- */
+.studioLayout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .studioLayout {
+    grid-template-columns: 1fr;
+  }
+  .studioPreview {
+    order: -1;
+  }
+  .previewSticky {
+    position: static;
+  }
+}
+
+.studioMain {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.tabBar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--bg);
+  padding: 10px 0;
+  margin: -10px 0 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.tabButton[data-active="false"] {
+  opacity: 0.8;
+}
+
+.studioPreview {
+  min-width: 0;
+}
+
+.previewSticky {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px;
+  box-shadow: var(--shadow-sm);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+}
+
 .panelHeader {
   display: flex;
   flex-direction: column;

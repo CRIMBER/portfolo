@@ -29,7 +29,7 @@ export default async function DirectoryPage() {
   return (
     <main className={styles.directoryMain}>
       <div className={styles.intro}>
-        <h1>Directory</h1>
+        <h1 className="gradientText">Directory</h1>
         <p>Every published portfolio, styled the way its owner built it. Browse, click through, get inspired.</p>
       </div>
 

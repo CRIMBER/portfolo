@@ -94,7 +94,9 @@
 }
 
 .reelTrigger {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 1em;
   padding: 0.5em 1.2em;
   border-radius: 999px;
