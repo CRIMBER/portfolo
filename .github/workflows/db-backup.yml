@@ -43,7 +43,10 @@ jobs:
           DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
         run: |
           mkdir -p backups
-          pg_dump "$DATABASE_URL" --format=custom --file="backups/$(date -u +%Y-%m-%dT%H-%M-%SZ).dump"
+          # Called by full path, not just "pg_dump" — the runner's
+          # postgresql-client-common wrapper still resolves the bare
+          # command to the old preinstalled v16 even with v18 present.
+          /usr/lib/postgresql/18/bin/pg_dump "$DATABASE_URL" --format=custom --file="backups/$(date -u +%Y-%m-%dT%H-%M-%SZ).dump"
 
       - name: Prune backups older than 30 days
         run: |
