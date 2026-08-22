@@ -39,6 +39,7 @@ export const minimalPreset: ThemeConfig = {
   canvasMode: "off",
   canvasHeightPx: 800,
   intro: { presetId: null, durationMs: 2200 },
+  qrIntro: { presetId: null, durationMs: 1800 },
   reel: { enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 },
 };
 
@@ -76,6 +77,7 @@ export const cyberpunkPreset: ThemeConfig = {
   canvasMode: "off",
   canvasHeightPx: 800,
   intro: { presetId: null, durationMs: 2200 },
+  qrIntro: { presetId: null, durationMs: 1800 },
   reel: { enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 },
 };
 
@@ -112,6 +114,7 @@ export const glassPreset: ThemeConfig = {
   canvasMode: "off",
   canvasHeightPx: 800,
   intro: { presetId: null, durationMs: 2200 },
+  qrIntro: { presetId: null, durationMs: 1800 },
   reel: { enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 },
 };
 
@@ -148,6 +151,7 @@ export const editorialPreset: ThemeConfig = {
   canvasMode: "off",
   canvasHeightPx: 800,
   intro: { presetId: null, durationMs: 2200 },
+  qrIntro: { presetId: null, durationMs: 1800 },
   reel: { enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 },
 };
 
@@ -186,6 +190,7 @@ export const futuristicPreset: ThemeConfig = {
   canvasMode: "off",
   canvasHeightPx: 800,
   intro: { presetId: null, durationMs: 2200 },
+  qrIntro: { presetId: null, durationMs: 1800 },
   reel: { enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 },
 };
 
@@ -223,6 +228,7 @@ export const brutalistPreset: ThemeConfig = {
   canvasMode: "off",
   canvasHeightPx: 800,
   intro: { presetId: null, durationMs: 2200 },
+  qrIntro: { presetId: null, durationMs: 1800 },
   reel: { enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 },
 };
 
@@ -260,6 +266,7 @@ export const retroPreset: ThemeConfig = {
   canvasMode: "off",
   canvasHeightPx: 800,
   intro: { presetId: null, durationMs: 2200 },
+  qrIntro: { presetId: null, durationMs: 1800 },
   reel: { enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 },
 };
 
@@ -297,6 +304,7 @@ export const experimentalPreset: ThemeConfig = {
   canvasMode: "off",
   canvasHeightPx: 800,
   intro: { presetId: null, durationMs: 2200 },
+  qrIntro: { presetId: null, durationMs: 1800 },
   reel: { enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 },
 };
 
@@ -333,6 +341,7 @@ export const professionalPreset: ThemeConfig = {
   canvasMode: "off",
   canvasHeightPx: 800,
   intro: { presetId: null, durationMs: 2200 },
+  qrIntro: { presetId: null, durationMs: 1800 },
   reel: { enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 },
 };
 
@@ -370,6 +379,7 @@ export const artisticPreset: ThemeConfig = {
   canvasMode: "off",
   canvasHeightPx: 800,
   intro: { presetId: null, durationMs: 2200 },
+  qrIntro: { presetId: null, durationMs: 1800 },
   reel: { enabled: false, transitionPresetId: "fade-in", autoAdvanceMs: 4000 },
 };
 

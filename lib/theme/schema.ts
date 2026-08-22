@@ -114,6 +114,17 @@ export interface IntroConfig {
   durationMs: number;
 }
 
+// Plays instead of the regular IntroConfig above when a visitor
+// arrives via a QR scan specifically (?src=qr — see
+// app/p/[stableSlug]/route.ts) — a separate, scan-themed cutscene
+// catalog in lib/intro/registry.ts's QR_INTRO_PRESET_IDS, gated by
+// its own sessionStorage key so seeing one doesn't suppress the
+// other for the same visitor in the same session.
+export interface QrIntroConfig {
+  presetId: string | null;
+  durationMs: number;
+}
+
 // A "▶ Watch reel" button (shown when enabled and there are 2+
 // projects) that opens a full-screen, visitor-driven slideshow —
 // separate from page load or scrolling entirely. transitionPresetId
@@ -139,5 +150,6 @@ export interface ThemeConfig {
   canvasMode: CanvasMode;
   canvasHeightPx: number;
   intro: IntroConfig;
+  qrIntro: QrIntroConfig;
   reel: ReelConfig;
 }

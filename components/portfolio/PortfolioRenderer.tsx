@@ -73,6 +73,11 @@ export interface PortfolioRendererProps {
   // to fill the whole viewport height.
   fullHeight?: boolean;
   canvasElements?: CanvasElementData[];
+  // True when this visit arrived via a QR scan (?src=qr — see
+  // app/p/[stableSlug]/route.ts) rather than a direct link. Only ever
+  // passed by the real public page; never true for the dashboard's
+  // own live preview.
+  viaQr?: boolean;
 }
 
 // Every implemented presetId per target, as a typed, bounded lookup —
@@ -140,6 +145,7 @@ export function PortfolioRenderer({
   socialLinks,
   fullHeight = true,
   canvasElements = [],
+  viaQr = false,
 }: PortfolioRendererProps) {
   const heroEntrance = findPreset(theme.animation, "heroEntrance");
   const scrollReveal = findPreset(theme.animation, "scrollReveal");
@@ -263,14 +269,25 @@ export function PortfolioRenderer({
     return card;
   });
 
+  // A QR-tagged visit prefers the member's dedicated QR-arrival
+  // cutscene when they've set one; otherwise it falls back to the
+  // regular intro like any other visit, rather than showing nothing.
+  const activeIntro =
+    viaQr && theme.qrIntro.presetId
+      ? { presetId: theme.qrIntro.presetId, durationMs: theme.qrIntro.durationMs, sessionKeySuffix: "qr" }
+      : theme.intro.presetId
+        ? { presetId: theme.intro.presetId, durationMs: theme.intro.durationMs, sessionKeySuffix: undefined }
+        : null;
+
   return (
     <div className={pageClassName} style={themeToStyle(theme)}>
       <link key={googleFontsHref(theme)} rel="stylesheet" href={googleFontsHref(theme)} />
       {fullHeight && <ScrollbarTheme thumb={theme.colors.primary} track={theme.colors.surface} />}
-      {fullHeight && theme.intro.presetId && (
+      {fullHeight && activeIntro && (
         <IntroOverlay
-          presetId={theme.intro.presetId}
-          durationMs={theme.intro.durationMs}
+          presetId={activeIntro.presetId}
+          durationMs={activeIntro.durationMs}
+          sessionKeySuffix={activeIntro.sessionKeySuffix}
           handle={handle}
           displayName={displayName}
           tagline={tagline}

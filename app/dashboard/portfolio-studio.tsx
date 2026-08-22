@@ -9,7 +9,7 @@ import type { CanvasAnimationTrigger, CanvasElementData, MarqueeWidgetData, Stat
 import { decodeWidget, defaultImageStyle, defaultTextStyle, defaultWidgetData, encodeWidget, WIDGET_KINDS, WIDGET_LABELS } from "@/lib/canvas/schema";
 import { ENTRANCE_PRESET_IDS, HOVER_PRESET_IDS, SCROLL_PRESET_IDS } from "@/lib/canvas/animation-registry";
 import { CanvasWidget } from "@/components/canvas/CanvasWidget";
-import { INTRO_PRESET_IDS, INTRO_PRESET_LABELS } from "@/lib/intro/registry";
+import { INTRO_PRESET_IDS, INTRO_PRESET_LABELS, QR_INTRO_PRESET_IDS, QR_INTRO_PRESET_LABELS } from "@/lib/intro/registry";
 import { IntroOverlay } from "@/components/intro/IntroOverlay";
 import { PortfolioRenderer, type PortfolioProject, type PortfolioSocialLink } from "@/components/portfolio/PortfolioRenderer";
 import { saveThemeConfig, saveCanvasElements, uploadBackgroundImage, uploadCanvasImage } from "./actions";
@@ -123,6 +123,7 @@ export function PortfolioStudio({
   const [uploading, setUploading] = useState(false);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [previewingIntro, setPreviewingIntro] = useState(false);
+  const [previewingQrIntro, setPreviewingQrIntro] = useState(false);
   const [widgetKindToAdd, setWidgetKindToAdd] = useState<WidgetKind>("stat");
   const [status, setStatus] = useState<{ kind: "idle" | "saving" | "saved" | "error"; message?: string }>({
     kind: "idle",
@@ -197,6 +198,16 @@ export function PortfolioStudio({
   function updateIntroDuration(durationMs: number) {
     touch();
     setTheme((t) => ({ ...t, intro: { ...t.intro, durationMs } }));
+  }
+
+  function updateQrIntroPreset(presetId: string | null) {
+    touch();
+    setTheme((t) => ({ ...t, qrIntro: { ...t.qrIntro, presetId } }));
+  }
+
+  function updateQrIntroDuration(durationMs: number) {
+    touch();
+    setTheme((t) => ({ ...t, qrIntro: { ...t.qrIntro, durationMs } }));
   }
 
   function updateReel(patch: Partial<ThemeConfig["reel"]>) {
@@ -728,6 +739,45 @@ export function PortfolioStudio({
 
       <section className="panel">
         <div className={themeStyles.panelHeader}>
+          <h3>QR scan intro</h3>
+          <p>A different cutscene shown only when a visitor arrives by scanning your QR code. Leave as None to use the regular intro above for QR scans too.</p>
+        </div>
+        <div className={themeStyles.controlsRow}>
+          <label className={themeStyles.controlField}>
+            Cutscene
+            <select value={theme.qrIntro.presetId ?? ""} onChange={(e) => updateQrIntroPreset(e.target.value || null)}>
+              <option value="">None</option>
+              {QR_INTRO_PRESET_IDS.map((id) => (
+                <option key={id} value={id}>
+                  {QR_INTRO_PRESET_LABELS[id]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className={themeStyles.controlField}>
+            Duration ({(theme.qrIntro.durationMs / 1000).toFixed(1)}s)
+            <input
+              type="range"
+              min={800}
+              max={6000}
+              step={100}
+              value={theme.qrIntro.durationMs}
+              onChange={(e) => updateQrIntroDuration(Number(e.target.value))}
+            />
+          </label>
+          <button
+            type="button"
+            className="btn-secondary"
+            disabled={!theme.qrIntro.presetId || previewingQrIntro}
+            onClick={() => setPreviewingQrIntro(true)}
+          >
+            {previewingQrIntro ? "Playing…" : "▶ Preview"}
+          </button>
+        </div>
+      </section>
+
+      <section className="panel">
+        <div className={themeStyles.panelHeader}>
           <h3>Showcase reel</h3>
           <p>A &ldquo;▶ Watch reel&rdquo; button visitors can click to step through your projects full-screen. Needs 2+ projects.</p>
         </div>
@@ -772,6 +822,22 @@ export function PortfolioStudio({
           fontFamily={`"${theme.typography.headingFont}", system-ui, sans-serif`}
           bypassGate
           onDone={() => setPreviewingIntro(false)}
+        />
+      )}
+
+      {previewingQrIntro && theme.qrIntro.presetId && (
+        <IntroOverlay
+          presetId={theme.qrIntro.presetId}
+          durationMs={theme.qrIntro.durationMs}
+          handle={handle}
+          displayName={profile.displayName || null}
+          tagline={profile.tagline || null}
+          textColor={theme.colors.text}
+          accentColor={theme.colors.primary}
+          backgroundColor={theme.colors.background}
+          fontFamily={`"${theme.typography.headingFont}", system-ui, sans-serif`}
+          bypassGate
+          onDone={() => setPreviewingQrIntro(false)}
         />
       )}
 

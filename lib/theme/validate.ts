@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { ThemeConfig } from "./schema";
 import { minimalPreset } from "./presets";
-import { INTRO_PRESET_IDS } from "@/lib/intro/registry";
+import { INTRO_PRESET_IDS, QR_INTRO_PRESET_IDS } from "@/lib/intro/registry";
 import { ENTRANCE_PRESET_IDS } from "@/lib/canvas/animation-registry";
 
 const designPersonality = z.enum([
@@ -109,6 +109,18 @@ const introConfig = z
   })
   .default({ presetId: null, durationMs: 2200 });
 
+// Defaulted like layoutConfig/canvasMode above: themeConfigs saved
+// before the QR intro existed won't have this field.
+const qrIntroConfig = z
+  .object({
+    presetId: z
+      .string()
+      .nullable()
+      .refine((id) => id === null || QR_INTRO_PRESET_IDS.includes(id), "Unknown QR intro preset."),
+    durationMs: z.number().min(400).max(15000),
+  })
+  .default({ presetId: null, durationMs: 1800 });
+
 const reelConfig = z
   .object({
     enabled: z.boolean(),
@@ -129,6 +141,7 @@ const themeConfigSchema = z.object({
   canvasMode,
   canvasHeightPx,
   intro: introConfig,
+  qrIntro: qrIntroConfig,
   reel: reelConfig,
 }) satisfies z.ZodType<ThemeConfig>;
 

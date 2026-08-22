@@ -129,6 +129,7 @@ export default async function PublicPortfolioPage({
       projects={projects.map((p) => ({ ...p, media: toPortfolioMedia(p.media) }))}
       socialLinks={socialLinks}
       canvasElements={canvasElements.map((el) => parseCanvasElement(el)).filter((el) => el !== null)}
+      viaQr={src === "qr"}
     />
   );
 }

@@ -117,6 +117,8 @@ export default async function DashboardPage() {
 
       {portfolio ? (
         <>
+          <GettingStarted username={member.username} />
+
           <section className="panel">
             <UsernameForm currentUsername={member.username} />
 
@@ -259,6 +261,35 @@ function ViewsChart({ daily }: { daily: { date: string; count: number }[] }) {
         );
       })}
     </div>
+  );
+}
+
+// A plain-language orientation for members who've never used the
+// dashboard before — the Studio section below has grown into a lot
+// of controls (theme, intros, canvas, reel), easy to land on and not
+// know where to start. Collapsible <details> rather than a
+// dismiss-and-remember panel: simplest thing that lets an experienced
+// member get it out of the way, with no extra state to track.
+function GettingStarted({ username }: { username: string | null }) {
+  return (
+    <details className="panel" open>
+      <summary style={{ cursor: "pointer", fontWeight: 700 }}>New here? Start here</summary>
+      <ol style={{ margin: "12px 0 0", paddingLeft: 20, display: "flex", flexDirection: "column", gap: 8 }}>
+        <li>
+          Pick a look — scroll down to <strong>Starting point</strong> in the Studio section and click a style to
+          instantly reskin your whole page. Everything it sets stays fully editable after.
+        </li>
+        <li>Fill in your profile and add your projects (with photos or short video clips) further down.</li>
+        <li>
+          Press <strong>Save</strong> at the bottom of the Studio to store your changes, then come back up here and
+          hit <strong>Publish</strong> to make your page live.
+        </li>
+        <li>
+          Your page lives at <code>/@{username ?? "yourhandle"}</code> — share that link, or hand out the{" "}
+          <strong>QR code</strong> below (anyone who scans it lands straight on your live page).
+        </li>
+      </ol>
+    </details>
   );
 }
 
