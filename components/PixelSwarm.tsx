@@ -5,11 +5,12 @@ import styles from "@/app/home.module.css";
 
 // A generative pixel-grid animation for the homepage background.
 // Two independent silhouettes assemble, idle, and hold — each its
-// own color — then periodically both burst apart and their combined
-// particles reform as a single shared shape (Earth or a cobweb),
-// hold, then burst again and split back into two new independent
-// silhouettes. Same canvas/ResizeObserver/RAF shape as
-// components/portfolio/Particles.tsx, just a bespoke homepage variant.
+// own color — then periodically both scatter into a haze that
+// drifts across the *entire* page, slowly shifts color, then settles
+// into a single shared shape (Earth or a cobweb); hold, then scatter
+// again and re-form as two new independent silhouettes. Same
+// canvas/ResizeObserver/RAF shape as components/portfolio/Particles.tsx,
+// just a bespoke homepage variant.
 //
 // Deliberately generic silhouettes (cape figure, domino mask,
 // lightning bolt, shield rim), not any specific studio's copyrighted
@@ -28,6 +29,25 @@ const GRID = 48;
 function pick<T>(arr: T[], excluding?: T): T {
   const pool = excluding === undefined ? arr : arr.filter((v) => v !== excluding);
   return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function easeInOut(p: number) {
+  const c = Math.min(1, Math.max(0, p));
+  return c < 0.5 ? 4 * c * c * c : 1 - Math.pow(-2 * c + 2, 3) / 2;
+}
+
+function hexToRgb(hex: string): [number, number, number] {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function lerpColor(a: string, b: string, t: number): string {
+  const [ar, ag, ab] = hexToRgb(a);
+  const [br, bg, bb] = hexToRgb(b);
+  const r = Math.round(ar + (br - ar) * t);
+  const g = Math.round(ag + (bg - ag) * t);
+  const bl = Math.round(ab + (bb - ab) * t);
+  return `rgb(${r}, ${g}, ${bl})`;
 }
 
 // ---- shape silhouettes, drawn into a GRID x GRID offscreen canvas
@@ -236,27 +256,33 @@ function buildMask(shape: SoloShape | UnityShape): MaskCell[] {
 }
 
 // Every particle's rendered position eases toward a "desired" point
-// that's either its settled target (toX/toY, while holding) or a
-// blend between that target and its burst waypoint (while
-// transitioning) — see draw(). toX/toY/burstX/burstY are all
-// reassigned in place by retarget() at each phase change; the
-// particle's own (x, y) is never reset, which is what keeps every
-// transition continuous instead of popping.
+// that blends toX/toY (its settled shape position) with roamX/roamY
+// (a point scattered anywhere across the *whole* canvas) according to
+// the current stage's dispersion amount — see draw(). toX/toY/
+// roamX/roamY/color are all reassigned in place by retarget() at each
+// shape swap; the particle's own (x, y) is never reset, which is what
+// keeps every transition continuous instead of popping.
 interface Particle {
   x: number;
   y: number;
   toX: number;
   toY: number;
-  burstX: number;
-  burstY: number;
+  roamX: number;
+  roamY: number;
+  prevColor: string;
   color: string;
+  wanderSeed: number;
   twinklePhase: number;
 }
 
-type Segment = "soloHold" | "toUnity" | "unityHold" | "toSolo";
-const DURATIONS: Record<Segment, number> = { soloHold: 3.6, toUnity: 2.4, unityHold: 3.6, toSolo: 2.4 };
-const ORDER: Segment[] = ["soloHold", "toUnity", "unityHold", "toSolo"];
-const HOLD_SEGMENTS = new Set<Segment>(["soloHold", "unityHold"]);
+// hold: settled, reads as a shape. disperse: breaks apart and drifts
+// out across the page (color unchanged). float: fully scattered,
+// wandering freely — this is where the shape identity swaps and the
+// color slowly turns from old to new. form: drifts back in and
+// resolves into the new shape (color already new).
+type Stage = "hold" | "disperse" | "float" | "form";
+const STAGE_ORDER: Stage[] = ["hold", "disperse", "float", "form"];
+const STAGE_DURATIONS: Record<Stage, number> = { hold: 4.6, disperse: 3.4, float: 4, form: 3.4 };
 
 export function PixelSwarm() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -273,8 +299,8 @@ export function PixelSwarm() {
     let width = 0;
     let height = 0;
     let frame = 0;
-    let soloCell = 6;
-    let unityCell = 8.5;
+    let soloCell = 6.5;
+    let unityCell = 10;
     let activeCellSize = soloCell;
 
     let clusterOrigins: { x: number; y: number }[] = [];
@@ -287,11 +313,11 @@ export function PixelSwarm() {
       colors: [pick(SOLO_COLORS), pick(SOLO_COLORS)],
     };
     let activeUnity: UnityShape = "cobweb";
+    let phase: "solo" | "unity" = "solo";
 
-    let segmentIndex = 0;
-    let segment: Segment = ORDER[0];
-    let segmentStart = -1;
-    let swappedThisSegment = false;
+    let stageIndex = 0;
+    let stage: Stage = STAGE_ORDER[0];
+    let stageStart = -1;
 
     const cursor = { x: -9999, y: -9999 };
     function handlePointerMove(e: PointerEvent) {
@@ -302,18 +328,23 @@ export function PixelSwarm() {
     window.addEventListener("pointermove", handlePointerMove);
 
     function layout() {
-      const scale = Math.min(1, Math.max(0.42, width / 1400));
-      soloCell = 6 * scale;
-      unityCell = 8.5 * scale;
+      const scale = Math.min(1.15, Math.max(0.5, width / 1400));
+      soloCell = 6.5 * scale;
+      unityCell = 10 * scale;
       const soloSize = GRID * soloCell;
       const unitySize = GRID * unityCell;
-      const marginRight = Math.max(70, width * 0.06);
 
+      // Clusters spread wide across the page (not tucked into one
+      // corner) so the swarm reads across the whole viewport, not
+      // just a small patch of it.
       clusterOrigins = [
-        { x: Math.max(20, width - soloSize * 1.85 - marginRight), y: height * 0.06 },
-        { x: Math.max(20, width - soloSize - marginRight), y: height * 0.4 },
+        { x: width * 0.08, y: height * 0.12 },
+        { x: Math.max(width * 0.08, width - soloSize - width * 0.1), y: height * 0.46 },
       ];
-      unityOrigin = { x: Math.max(20, width - unitySize - marginRight), y: height * 0.1 };
+      // Centered horizontally but sitting in the upper portion of the
+      // page — the hero copy is bottom-anchored, so this keeps the
+      // centerpiece shape from sitting squarely on top of it.
+      unityOrigin = { x: width / 2 - unitySize / 2, y: Math.max(20, height * 0.32 - unitySize / 2) };
     }
 
     function shapeTargets(shape: SoloShape | UnityShape, origin: { x: number; y: number }, cell: number, color: string) {
@@ -324,40 +355,30 @@ export function PixelSwarm() {
       }));
     }
 
-    function centerOf(origin: { x: number; y: number }, cell: number) {
-      const size = GRID * cell;
-      return { x: origin.x + size / 2, y: origin.y + size / 2 };
-    }
-
-    // Reassigns every particle's target + burst waypoint for the next
-    // phase, reusing each particle's *current* on-screen position
-    // (not its old target) as the basis for the new burst direction —
-    // that's what makes an identity swap invisible: it happens while
-    // particles are already mid-flight near their scatter point.
-    function retarget(targets: { x: number; y: number; color: string }[], burstCenter: { x: number; y: number }, burstReach: number, cellSize: number) {
+    // Reassigns every particle's shape target, a fresh scatter point
+    // spread anywhere across the current canvas, and its color swap.
+    // Reuses each particle's *current* on-screen position (not its
+    // old target) as the starting point, which is what makes an
+    // identity swap invisible: it happens mid-flight, already
+    // scattered, never as a pop.
+    function retarget(targets: { x: number; y: number; color: string }[], cellSize: number) {
       activeCellSize = cellSize;
+      const marginX = Math.max(24, width * 0.02);
+      const marginY = Math.max(24, height * 0.02);
       particles = targets.map((t, i) => {
         const prev = particles[i];
         const fromX = prev ? prev.x : t.x;
         const fromY = prev ? prev.y : t.y;
-        const dx = fromX - burstCenter.x;
-        const dy = fromY - burstCenter.y;
-        const dist = Math.hypot(dx, dy) || 1;
-        const nx = dx / dist;
-        const ny = dy / dist;
-        // Kept tight (unlike a wider spread) so a burst never scatters
-        // far enough to reach the headline/link text at the bottom of
-        // the page, and stays dense enough to read as a burst rather
-        // than fading into a handful of barely-visible stray dots.
-        const burstDist = dist + burstReach * (0.35 + Math.random() * 0.5);
         return {
           x: fromX,
           y: fromY,
           toX: t.x,
           toY: t.y,
-          burstX: burstCenter.x + nx * burstDist + (Math.random() - 0.5) * 30,
-          burstY: burstCenter.y + ny * burstDist + (Math.random() - 0.5) * 30,
+          roamX: marginX + Math.random() * Math.max(1, width - marginX * 2),
+          roamY: marginY + Math.random() * Math.max(1, height - marginY * 2),
+          prevColor: prev ? prev.color : t.color,
           color: t.color,
+          wanderSeed: prev ? prev.wanderSeed : Math.random() * 1000,
           twinklePhase: prev ? prev.twinklePhase : Math.random() * Math.PI * 2,
         };
       });
@@ -378,18 +399,14 @@ export function PixelSwarm() {
         ...shapeTargets(shapeA, clusterOrigins[0], soloCell, colorA),
         ...shapeTargets(shapeB, clusterOrigins[1], soloCell, colorB),
       ];
-      const centerA = centerOf(clusterOrigins[0], soloCell);
-      const centerB = centerOf(clusterOrigins[1], soloCell);
-      const burstCenter = { x: (centerA.x + centerB.x) / 2, y: (centerA.y + centerB.y) / 2 };
-      retarget(targets, burstCenter, Math.max(GRID * soloCell * 0.24, 45), soloCell);
+      retarget(targets, soloCell);
     }
 
     function enterUnity(pickNew: boolean) {
       if (pickNew) activeUnity = activeUnity === "earth" ? "cobweb" : "earth";
       const color = activeUnity === "cobweb" ? COBWEB_COLOR : EARTH_OCEAN;
       const targets = shapeTargets(activeUnity, unityOrigin, unityCell, color);
-      const center = centerOf(unityOrigin, unityCell);
-      retarget(targets, center, Math.max(GRID * unityCell * 0.22, 55), unityCell);
+      retarget(targets, unityCell);
     }
 
     const resize = () => {
@@ -399,7 +416,7 @@ export function PixelSwarm() {
       layout();
       // Re-seat whichever configuration is active at its new screen
       // position without changing identity or restarting the cycle.
-      if (segment === "unityHold" || segment === "toSolo") enterUnity(false);
+      if (phase === "unity") enterUnity(false);
       else enterSolo(false);
     };
 
@@ -410,7 +427,7 @@ export function PixelSwarm() {
 
       if (reduceMotion) {
         for (const part of particles) {
-          ctx.globalAlpha = 1;
+          ctx.globalAlpha = 0.45;
           ctx.fillStyle = part.color;
           const size = Math.max(1.5, activeCellSize - 1.5);
           ctx.fillRect(part.toX, part.toY, size, size);
@@ -419,40 +436,48 @@ export function PixelSwarm() {
       }
 
       const t = now / 1000;
-      if (segmentStart < 0) segmentStart = t;
-      let elapsed = t - segmentStart;
-      if (elapsed > DURATIONS[segment]) {
-        segmentIndex = (segmentIndex + 1) % ORDER.length;
-        segment = ORDER[segmentIndex];
-        segmentStart = t;
+      if (stageStart < 0) stageStart = t;
+      let elapsed = t - stageStart;
+      if (elapsed > STAGE_DURATIONS[stage]) {
+        const prevStage = stage;
+        stageIndex = (stageIndex + 1) % STAGE_ORDER.length;
+        stage = STAGE_ORDER[stageIndex];
+        stageStart = t;
         elapsed = 0;
-        swappedThisSegment = false;
-      }
-
-      let dispersion = 0;
-      if (!HOLD_SEGMENTS.has(segment)) {
-        const p = elapsed / DURATIONS[segment];
-        const raw = (1 - Math.cos(p * Math.PI * 2)) / 2;
-        dispersion = Math.pow(raw, 1.2);
-        if (!swappedThisSegment && p >= 0.5) {
-          swappedThisSegment = true;
-          if (segment === "toUnity") enterUnity(true);
+        // The identity swap happens exactly once per half-cycle, right
+        // as the swarm finishes dispersing and starts floating — so
+        // the new color has the entire float stage to slowly turn
+        // before the shape starts forming again.
+        if (prevStage === "disperse" && stage === "float") {
+          phase = phase === "solo" ? "unity" : "solo";
+          if (phase === "unity") enterUnity(true);
           else enterSolo(true);
         }
       }
 
-      const repelRadius = 85;
-      const repelStrength = 55;
-      const isHold = HOLD_SEGMENTS.has(segment);
+      const p = elapsed / STAGE_DURATIONS[stage];
+      let dispersion: number;
+      if (stage === "hold") dispersion = 0;
+      else if (stage === "float") dispersion = 1;
+      else if (stage === "disperse") dispersion = easeInOut(p);
+      else dispersion = 1 - easeInOut(p);
+
+      const repelRadius = 90;
+      const repelStrength = 50;
+      // Idle jitter while settled, growing into a loose, free-roaming
+      // wander the more scattered the swarm is.
+      const wanderAmp = 3 + dispersion * 40;
 
       for (const part of particles) {
-        const bx = isHold ? part.toX : lerp(part.toX, part.burstX, dispersion);
-        const by = isHold ? part.toY : lerp(part.toY, part.burstY, dispersion);
+        const baseX = lerp(part.toX, part.roamX, dispersion);
+        const baseY = lerp(part.toY, part.roamY, dispersion);
+        const wx = Math.sin(now * 0.00038 + part.wanderSeed) * wanderAmp;
+        const wy = Math.cos(now * 0.00029 + part.wanderSeed * 1.6) * wanderAmp;
 
-        let ox = bx;
-        let oy = by;
-        const dx = bx - cursor.x;
-        const dy = by - cursor.y;
+        let ox = baseX + wx;
+        let oy = baseY + wy;
+        const dx = ox - cursor.x;
+        const dy = oy - cursor.y;
         const dist = Math.hypot(dx, dy);
         if (dist > 0.001 && dist < repelRadius) {
           const force = (1 - dist / repelRadius) * repelStrength;
@@ -460,13 +485,18 @@ export function PixelSwarm() {
           oy += (dy / dist) * force;
         }
 
-        part.x += (ox - part.x) * 0.1;
-        part.y += (oy - part.y) * 0.1;
+        part.x += (ox - part.x) * 0.07;
+        part.y += (oy - part.y) * 0.07;
 
-        const twinkle = 0.75 + Math.sin(now * 0.002 + part.twinklePhase) * 0.25;
-        ctx.globalAlpha = (1 - dispersion * 0.3) * twinkle;
-        const size = Math.max(1.5, activeCellSize - 1.5) * (1 - dispersion * 0.25);
-        ctx.fillStyle = part.color;
+        const renderColor = stage === "float" ? lerpColor(part.prevColor, part.color, easeInOut(p)) : part.color;
+
+        const twinkle = 0.75 + Math.sin(now * 0.0018 + part.twinklePhase) * 0.25;
+        // Kept deliberately faint — this is atmosphere behind the
+        // page's real content, not a foreground effect, and it now
+        // spans the full viewport instead of one corner.
+        ctx.globalAlpha = lerp(0.42, 0.15, dispersion) * twinkle;
+        const size = Math.max(1.5, activeCellSize - 1.5) * (1 - dispersion * 0.2);
+        ctx.fillStyle = renderColor;
         ctx.fillRect(part.x, part.y, size, size);
       }
       ctx.globalAlpha = 1;
@@ -483,6 +513,7 @@ export function PixelSwarm() {
     for (const part of particles) {
       part.x = part.toX;
       part.y = part.toY;
+      part.prevColor = part.color;
     }
     draw(0);
 
