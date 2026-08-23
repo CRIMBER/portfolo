@@ -43,6 +43,33 @@
   gap: 8px;
 }
 
+/* ---- starter layout templates ---- */
+.templateGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.templateChip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.templateName {
+  font-weight: 600;
+}
+
+.templateDescription {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
 /* ---- editable canvas surface ---- */
 .canvasShell {
   border: 1px solid var(--border);

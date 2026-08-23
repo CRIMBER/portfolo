@@ -7,6 +7,7 @@ import { parseColor, toRgba } from "@/lib/theme/color";
 import { PRESET_OPTIONS, TARGET_LABELS, EDITABLE_TARGETS, FONT_OPTIONS, FONT_WEIGHT_OPTIONS } from "@/lib/theme/preset-registry";
 import type { CanvasAnimationTrigger, CanvasElementData, MarqueeWidgetData, StatusWidgetData, WidgetKind, WidgetPayload } from "@/lib/canvas/schema";
 import { decodeWidget, defaultImageStyle, defaultTextStyle, defaultWidgetData, encodeWidget, WIDGET_KINDS, WIDGET_LABELS } from "@/lib/canvas/schema";
+import { canvasTemplates } from "@/lib/canvas/templates";
 import { ENTRANCE_PRESET_IDS, HOVER_PRESET_IDS, SCROLL_PRESET_IDS } from "@/lib/canvas/animation-registry";
 import { CanvasWidget } from "@/components/canvas/CanvasWidget";
 import { INTRO_PRESET_IDS, INTRO_PRESET_LABELS, QR_INTRO_PRESET_IDS, QR_INTRO_PRESET_LABELS } from "@/lib/intro/registry";
@@ -412,6 +413,25 @@ export function PortfolioStudio({
       },
     ]);
     setSelectedId(id);
+  }
+
+  function applyTemplate(key: string) {
+    const template = canvasTemplates[key];
+    if (!template) return;
+    if (elements.length > 0 && !window.confirm("Replace your current canvas layout with this template? This can't be undone once you save.")) {
+      return;
+    }
+    touch();
+    setElements(template.build());
+    setSelectedId(null);
+    // Only bump height/turn the canvas on — never shrink a taller
+    // canvas the member already set up, and never downgrade an
+    // existing "replace" mode choice back to "layer".
+    setTheme((t) => ({
+      ...t,
+      canvasHeightPx: Math.max(t.canvasHeightPx, template.recommendedCanvasHeightPx),
+      canvasMode: t.canvasMode === "off" ? "layer" : t.canvasMode,
+    }));
   }
 
   async function replaceImage(id: string, event: ChangeEvent<HTMLInputElement>) {
@@ -959,6 +979,23 @@ export function PortfolioStudio({
       </>)}
 
       {activeTab === "canvas" && (<>
+      <section className="panel">
+        <div className={canvasStyles.panelHeader}>
+          <h3>Starting point</h3>
+          <p>Not sure where to begin? Apply a starter layout, then move things around freely.</p>
+        </div>
+        <div className={canvasStyles.templateGrid}>
+          {Object.entries(canvasTemplates).map(([key, template]) => (
+            <button key={key} type="button" className="btn-secondary" onClick={() => applyTemplate(key)}>
+              <span className={canvasStyles.templateChip}>
+                <span className={canvasStyles.templateName}>{template.name}</span>
+                <span className={canvasStyles.templateDescription}>{template.description}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+
       <section className="panel">
         <div className={canvasStyles.panelHeader}>
           <h3>Canvas builder</h3>
