@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { DirectoryEntry } from "@/lib/directory";
+import { SearchIcon } from "@/components/icons";
 import { DirectoryCard } from "./DirectoryCard";
 import styles from "./directory.module.css";
 
@@ -30,14 +31,17 @@ export function DirectoryGrid({ featured, entries }: DirectoryGridProps) {
 
   return (
     <>
-      <input
-        type="search"
-        className={styles.searchInput}
-        placeholder="Search by name or vibe…"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        aria-label="Search the directory"
-      />
+      <div className={styles.searchWrap}>
+        <SearchIcon size={15} className={styles.searchIcon} />
+        <input
+          type="search"
+          className={styles.searchInput}
+          placeholder="Search by name or vibe…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          aria-label="Search the directory"
+        />
+      </div>
 
       {showFeatured && (
         <div className={styles.featuredWrap}>
@@ -55,8 +59,8 @@ export function DirectoryGrid({ featured, entries }: DirectoryGridProps) {
         )
       ) : (
         <div className={styles.grid}>
-          {filtered.map((entry) => (
-            <DirectoryCard entry={entry} key={entry.username} />
+          {filtered.map((entry, i) => (
+            <DirectoryCard entry={entry} index={i} key={entry.username} />
           ))}
         </div>
       )}

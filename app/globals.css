@@ -89,6 +89,10 @@ body {
 code,
 .mono {
   font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Consolas, monospace;
+  /* A long unbroken URL/path (the QR-code link, a page's own /@handle)
+     has no natural break points, so without this it overflows its
+     container sideways on a narrow viewport instead of wrapping. */
+  overflow-wrap: break-word;
 }
 
 a {

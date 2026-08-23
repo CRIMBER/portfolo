@@ -40,6 +40,22 @@
   }
 }
 
+.homeLink {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  align-self: flex-start;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.homeLink:hover {
+  color: var(--text);
+  text-decoration: none;
+}
+
 .panelEntrance {
   position: relative;
   z-index: 1;

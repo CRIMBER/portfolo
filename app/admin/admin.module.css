@@ -1,0 +1,189 @@
+/* Admin stays plain per the note in globals.css — no gradientText
+   headings, no decorative blobs. "Premium" here means well-composed
+   data density (real layout instead of inline styles, a sticky
+   header, legible row state) rather than added flourish. The one
+   flourish this borrows is the stat-number gradient-clip-text trick,
+   already used the same way in dashboard.module.css's .statValue —
+   reusing it here is consistency, not a new departure. */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.subtitle {
+  margin-top: -12px;
+}
+
+.statRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.statTile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  min-width: 96px;
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+}
+
+.statValue {
+  font-size: 1.55rem;
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.statValueWarning {
+  background: none;
+  -webkit-text-fill-color: unset;
+  color: var(--warning);
+}
+
+.statLabel {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.emptyState {
+  align-items: center;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+/* Local stand-in for globals.css's .table-scroll (overflow-x:auto) —
+   a CSS-module class literally named table-scroll would get hashed
+   like any other local selector and never match that global class, so
+   the sticky-header rule below needs its own wrapper to hook into.
+   The table itself already carries a border/radius/background from
+   globals.css's bare `table` rule; this just adds the shadow the rest
+   of the app's cards use. */
+.scrollWrap {
+  overflow-x: auto;
+}
+.scrollWrap table {
+  box-shadow: var(--shadow-sm);
+}
+.scrollWrap th {
+  position: sticky;
+  top: 0;
+}
+
+.memberCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent-text);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+
+.memberText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 220px;
+}
+
+.username {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* Folds the Status column into the Member cell below 640px — three
+   columns (member/status/actions) don't fit a phone width even with
+   icon-only action buttons, and Status is the one column whose value
+   reads fine tucked under the name instead of holding its own slot.
+   Two separate elements (rather than one toggled via a shared class)
+   so neither fights the global .badge rule's own display:inline-flex
+   for the cascade's "last one wins" tie-break. */
+.statusCol {
+  display: table-cell;
+}
+.statusInlineWrap {
+  display: none;
+}
+@media (max-width: 640px) {
+  .statusCol {
+    display: none;
+  }
+  .statusInlineWrap {
+    display: block;
+    margin-top: 2px;
+  }
+}
+
+.pendingRow {
+  background: var(--warning-soft);
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+/* Below this width the three action buttons' full labels no longer
+   fit next to the member/status columns, forcing a horizontal scroll
+   to reach Approve/Reject/Revoke on every row — the table's own
+   overflow-x:auto contains that scroll rather than it leaking to the
+   page (verified: document.body.scrollWidth stays at the viewport
+   width), but requiring a swipe to reach the primary actions on a
+   management table is still worse than it needs to be. Icon-only
+   buttons plus tighter columns get everything on-screen without it. */
+@media (max-width: 640px) {
+  .actionBtn {
+    padding: 7px 8px;
+  }
+  .actionLabel {
+    display: none;
+  }
+  .email {
+    max-width: 130px;
+  }
+  .avatar {
+    width: 26px;
+    height: 26px;
+    font-size: 0.68rem;
+  }
+}

@@ -2,7 +2,9 @@ import { redirect } from "next/navigation";
 import type { MemberStatus } from "@prisma/client";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { CheckIcon, CloseIcon, TrashIcon } from "@/components/icons";
 import { approveMember, rejectMember, revokeMember } from "./actions";
+import styles from "./admin.module.css";
 
 const STATUS_TONE: Record<MemberStatus, string> = {
   PENDING: "warning",
@@ -33,68 +35,101 @@ export default async function AdminPage() {
 
   return (
     <main>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+      <div className={styles.header}>
         <h1>Members</h1>
         <a href="/dashboard" className="btn-secondary">
           Back to dashboard
         </a>
       </div>
-      <p style={{ marginTop: -12 }}>Approve, reject, or revoke access. This does not touch anyone&rsquo;s portfolio content.</p>
+      <p className={styles.subtitle}>Approve, reject, or revoke access. This does not touch anyone&rsquo;s portfolio content.</p>
 
-      <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+      <div className={styles.statRow}>
         <SummaryStat label="Pending" value={pendingCount} tone={pendingCount > 0 ? "warning" : undefined} />
         <SummaryStat label="Approved" value={approvedCount} />
         <SummaryStat label="Total" value={members.length} />
       </div>
 
       {members.length === 0 ? (
-        <div className="panel" style={{ alignItems: "center", textAlign: "center", color: "var(--text-muted)" }}>
-          No one has signed in yet.
-        </div>
+        <div className={`panel ${styles.emptyState}`}>No one has signed in yet.</div>
       ) : (
-        <div className="table-scroll">
+        <div className={styles.scrollWrap}>
           <table>
             <thead>
               <tr>
-                <th>Email</th>
-                <th>Username</th>
-                <th>Status</th>
+                <th>Member</th>
+                <th className={styles.statusCol}>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {members.map((m) => (
-                <tr key={m.id} style={m.status === "PENDING" && !m.isOwner ? { background: "var(--warning-soft)" } : undefined}>
-                  <td>{m.email}</td>
-                  <td>{m.username ?? "—"}</td>
-                  <td>
-                    <span className="badge" data-tone={m.isOwner ? "accent" : STATUS_TONE[m.status]}>
-                      {m.isOwner ? "Owner" : m.status}
-                    </span>
-                  </td>
-                  <td>
-                    {!m.isOwner && (
-                      <div style={{ display: "flex", gap: 6, flexWrap: "nowrap" }}>
-                        <form action={approveMember.bind(null, m.id)}>
-                          <button type="submit" disabled={m.status === "APPROVED"}>
-                            Approve
-                          </button>
-                        </form>
-                        <form action={rejectMember.bind(null, m.id)}>
-                          <button type="submit" className="btn-secondary" disabled={m.status === "REJECTED"}>
-                            Reject
-                          </button>
-                        </form>
-                        <form action={revokeMember.bind(null, m.id)}>
-                          <button type="submit" className="btn-secondary" data-tone="danger" disabled={m.status === "REVOKED"}>
-                            Revoke
-                          </button>
-                        </form>
+              {members.map((m) => {
+                const initial = (m.username ?? m.email).charAt(0).toUpperCase();
+                const statusBadge = (
+                  <span className="badge" data-tone={m.isOwner ? "accent" : STATUS_TONE[m.status]}>
+                    {m.isOwner ? "Owner" : m.status}
+                  </span>
+                );
+                return (
+                  <tr key={m.id} className={m.status === "PENDING" && !m.isOwner ? styles.pendingRow : undefined}>
+                    <td>
+                      <div className={styles.memberCell}>
+                        <span className={styles.avatar} aria-hidden="true">
+                          {initial}
+                        </span>
+                        <div className={styles.memberText}>
+                          <span className={styles.email}>{m.email}</span>
+                          <span className={styles.username}>{m.username ? `@${m.username}` : "no username yet"}</span>
+                          <span className={styles.statusInlineWrap}>{statusBadge}</span>
+                        </div>
                       </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className={styles.statusCol}>{statusBadge}</td>
+                    <td>
+                      {!m.isOwner && (
+                        <div className={styles.actions}>
+                          <form action={approveMember.bind(null, m.id)}>
+                            <button
+                              type="submit"
+                              className={styles.actionBtn}
+                              disabled={m.status === "APPROVED"}
+                              title="Approve"
+                              aria-label={`Approve ${m.email}`}
+                            >
+                              <CheckIcon size={13} />
+                              <span className={styles.actionLabel}>Approve</span>
+                            </button>
+                          </form>
+                          <form action={rejectMember.bind(null, m.id)}>
+                            <button
+                              type="submit"
+                              className={`btn-secondary ${styles.actionBtn}`}
+                              disabled={m.status === "REJECTED"}
+                              title="Reject"
+                              aria-label={`Reject ${m.email}`}
+                            >
+                              <CloseIcon size={13} />
+                              <span className={styles.actionLabel}>Reject</span>
+                            </button>
+                          </form>
+                          <form action={revokeMember.bind(null, m.id)}>
+                            <button
+                              type="submit"
+                              className={`btn-secondary ${styles.actionBtn}`}
+                              data-tone="danger"
+                              disabled={m.status === "REVOKED"}
+                              title="Revoke"
+                              aria-label={`Revoke ${m.email}`}
+                            >
+                              <TrashIcon size={13} />
+                              <span className={styles.actionLabel}>Revoke</span>
+                            </button>
+                          </form>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -105,11 +140,9 @@ export default async function AdminPage() {
 
 function SummaryStat({ label, value, tone }: { label: string; value: number; tone?: "warning" }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <span style={{ fontSize: "1.5rem", fontWeight: 800, lineHeight: 1, color: tone === "warning" ? "var(--warning)" : undefined }}>
-        {value}
-      </span>
-      <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{label}</span>
+    <div className={styles.statTile}>
+      <span className={`${styles.statValue} ${tone === "warning" ? styles.statValueWarning : ""}`}>{value}</span>
+      <span className={styles.statLabel}>{label}</span>
     </div>
   );
 }

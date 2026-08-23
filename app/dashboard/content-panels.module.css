@@ -15,9 +15,16 @@
   gap: 16px;
 }
 
+/* align-items: stretch overrides globals.css's `label { align-items:
+   center }` (written for a row-direction label+checkbox, but label is
+   a tag selector so it reaches every label including this column one)
+   — without it, the label text and the input/textarea both shrink to
+   their content width and center in the field instead of sitting
+   flush left and filling it. */
 .field {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   gap: 6px;
   font-size: 0.8rem;
   color: var(--text-muted);

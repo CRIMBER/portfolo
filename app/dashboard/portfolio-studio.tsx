@@ -12,6 +12,7 @@ import { ENTRANCE_PRESET_IDS, HOVER_PRESET_IDS, SCROLL_PRESET_IDS } from "@/lib/
 import { CanvasWidget } from "@/components/canvas/CanvasWidget";
 import { INTRO_PRESET_IDS, INTRO_PRESET_LABELS, QR_INTRO_PRESET_IDS, QR_INTRO_PRESET_LABELS } from "@/lib/intro/registry";
 import { CloseIcon, PlayIcon } from "@/components/icons";
+import { useConfirm } from "@/components/ConfirmProvider";
 import { IntroOverlay } from "@/components/intro/IntroOverlay";
 import { PortfolioRenderer, type PortfolioProject, type PortfolioSocialLink } from "@/components/portfolio/PortfolioRenderer";
 import { saveThemeConfig, saveCanvasElements, uploadBackgroundImage, uploadCanvasImage, uploadMusicFile } from "./actions";
@@ -149,6 +150,7 @@ export function PortfolioStudio({
   const [dirty, setDirty] = useState(false);
   const [activeTab, setActiveTab] = useState<StudioTab>("content");
   const canvasRef = useRef<HTMLDivElement>(null);
+  const confirm = useConfirm();
 
   const surface = parseColor(theme.colors.surface);
   const selected = elements.find((el) => el.id === selectedId) ?? null;
@@ -415,11 +417,17 @@ export function PortfolioStudio({
     setSelectedId(id);
   }
 
-  function applyTemplate(key: string) {
+  async function applyTemplate(key: string) {
     const template = canvasTemplates[key];
     if (!template) return;
-    if (elements.length > 0 && !window.confirm("Replace your current canvas layout with this template? This can't be undone once you save.")) {
-      return;
+    if (elements.length > 0) {
+      const ok = await confirm({
+        title: "Replace canvas layout?",
+        message: "Replace your current canvas layout with this template? This can't be undone once you save.",
+        confirmLabel: "Replace",
+        tone: "danger",
+      });
+      if (!ok) return;
     }
     touch();
     setElements(template.build());
@@ -452,8 +460,14 @@ export function PortfolioStudio({
     updateElement(id, { content: result.url });
   }
 
-  function deleteElement(id: string) {
-    if (!window.confirm("Delete this element? This can't be undone once you save.")) return;
+  async function deleteElement(id: string) {
+    const ok = await confirm({
+      title: "Delete element?",
+      message: "Delete this element? This can't be undone once you save.",
+      confirmLabel: "Delete",
+      tone: "danger",
+    });
+    if (!ok) return;
     touch();
     setElements((els) => els.filter((el) => el.id !== id));
     if (selectedId === id) setSelectedId(null);
@@ -758,8 +772,8 @@ export function PortfolioStudio({
         </div>
         <p className={themeStyles.hint}>Current: {theme.music.url ?? "None"}</p>
         <div className={themeStyles.controlsRow}>
-          <label className={themeStyles.controlField}>
-            <input type="checkbox" checked={theme.music.autoplay} onChange={(e) => updateMusic({ autoplay: e.target.checked })} />{" "}
+          <label className={themeStyles.checkboxField}>
+            <input type="checkbox" checked={theme.music.autoplay} onChange={(e) => updateMusic({ autoplay: e.target.checked })} />
             Autoplay
           </label>
           <label className={themeStyles.controlField}>
@@ -918,8 +932,9 @@ export function PortfolioStudio({
           <p>A &ldquo;Watch reel&rdquo; button visitors can click to step through your projects full-screen. Needs 2+ projects.</p>
         </div>
         <div className={themeStyles.controlsRow}>
-          <label className={themeStyles.controlField}>
-            <input type="checkbox" checked={theme.reel.enabled} onChange={(e) => updateReel({ enabled: e.target.checked })} /> Enabled
+          <label className={themeStyles.checkboxField}>
+            <input type="checkbox" checked={theme.reel.enabled} onChange={(e) => updateReel({ enabled: e.target.checked })} />
+            Enabled
           </label>
           <label className={themeStyles.controlField}>
             Transition
@@ -1211,7 +1226,7 @@ export function PortfolioStudio({
               </div>
             )}
 
-            <div className={canvasStyles.inspectorRow}>
+            <div className={canvasStyles.inspectorGrid}>
               <label className={canvasStyles.controlField}>
                 X ({selected.xPct.toFixed(0)}%)
                 <input
@@ -1248,7 +1263,7 @@ export function PortfolioStudio({
                   onChange={(e) => updateElement(selected.id, { rotationDeg: clamp(Number(e.target.value), -180, 180) })}
                 />
               </label>
-              <label className={canvasStyles.controlField}>
+              <label className={canvasStyles.controlField} style={{ gridColumn: "1 / -1" }}>
                 Layering
                 <span className={canvasStyles.zButtons}>
                   <button type="button" className="btn-secondary" onClick={() => sendToBack(selected.id)}>

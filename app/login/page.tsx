@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
 import { Logo } from "@/components/Logo";
+import { ChevronLeftIcon } from "@/components/icons";
 import styles from "./login.module.css";
 
 export default async function LoginPage() {
@@ -15,6 +16,9 @@ export default async function LoginPage() {
         <span className={styles.blobOne} />
         <span className={styles.blobTwo} />
       </div>
+      <a href="/" className={styles.homeLink}>
+        <ChevronLeftIcon size={13} /> Home
+      </a>
       <div className={`panel ${styles.panelEntrance}`}>
         <div style={{ display: "flex", justifyContent: "center" }}>
           <Logo size={44} />

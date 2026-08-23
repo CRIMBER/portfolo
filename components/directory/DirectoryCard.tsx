@@ -8,7 +8,15 @@ import styles from "./directory.module.css";
 // rather than one house style, and reuses their actual chosen hover
 // preset (see HOVER_CLASS) — browsing the grid previews what their
 // real page feels like before you click through.
-export function DirectoryCard({ entry, featured = false }: { entry: DirectoryEntry; featured?: boolean }) {
+export function DirectoryCard({
+  entry,
+  featured = false,
+  index = 0,
+}: {
+  entry: DirectoryEntry;
+  featured?: boolean;
+  index?: number;
+}) {
   const hoverClass = entry.hoverPresetId ? HOVER_CLASS[entry.hoverPresetId] : undefined;
   const cardClassName = [styles.card, featured ? styles.featuredCard : "", hoverClass].filter(Boolean).join(" ");
   const name = entry.displayName || `@${entry.username}`;
@@ -22,6 +30,9 @@ export function DirectoryCard({ entry, featured = false }: { entry: DirectoryEnt
           background: entry.backgroundCss,
           color: entry.colors.text,
           "--tc-color-primary": entry.colors.primary,
+          // Caps the entrance stagger so a large directory doesn't push
+          // the last cards' fade-in delay out several seconds.
+          "--i": Math.min(index, 10),
         } as CSSProperties
       }
     >

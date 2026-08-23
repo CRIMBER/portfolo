@@ -121,9 +121,21 @@
   align-items: start;
 }
 
+/* Typography's font/weight controlFields also live in this grid,
+   reusing it rather than a bespoke layout — but .controlField's own
+   min-width: 200px (sized for the flex .controlsRow it usually sits
+   in) overrides this grid's 110px track minimum, so on a narrow
+   viewport the grid can't actually shrink those items and the row
+   pushes past the page edge. Dropping it back to auto here lets this
+   grid's own minmax govern the width instead. */
+.colorGrid .controlField {
+  min-width: 0;
+}
+
 .colorField {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   gap: 6px;
   font-size: 0.8rem;
   color: var(--text-muted);
@@ -149,9 +161,14 @@
   border-top: 1px solid var(--border);
 }
 
+/* See the matching comment in content-panels.module.css's .field —
+   same fix for the same globals.css `label { align-items: center }`
+   leak (text/select/slider were centering and shrinking instead of
+   sitting flush left and filling the field). */
 .controlField {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   gap: 6px;
   font-size: 0.8rem;
   color: var(--text-muted);
@@ -162,6 +179,19 @@
   font-size: 0.72rem;
   color: var(--text-muted);
   font-weight: 400;
+}
+
+/* A checkbox + its own text on one line, as opposed to .controlField's
+   label-text-above-input stack — reusing .controlField for these two
+   checkboxes was stacking the box above the word instead of sitting
+   it beside it. */
+.checkboxField {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
 /* ---- background ---- */

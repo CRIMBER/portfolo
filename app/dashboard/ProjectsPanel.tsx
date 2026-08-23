@@ -3,6 +3,7 @@
 import { useState, type ChangeEvent } from "react";
 import { uploadProjectMedia } from "./actions";
 import { ChevronUpIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, CloseIcon } from "@/components/icons";
+import { useConfirm } from "@/components/ConfirmProvider";
 import { formatDuration, newLocalId, type EditableMedia, type EditableProject } from "./content-types";
 import { videoThumbnailUrl } from "@/lib/media";
 import styles from "./content-panels.module.css";
@@ -50,13 +51,20 @@ function readVideoDuration(file: File): Promise<number | null> {
 
 export function ProjectsPanel({ projects, onChange }: ProjectsPanelProps) {
   const [uploadingFor, setUploadingFor] = useState<string | null>(null);
+  const confirm = useConfirm();
 
   function update(id: string, patch: Partial<EditableProject>) {
     onChange(projects.map((p) => (p.id === id ? { ...p, ...patch } : p)));
   }
 
-  function remove(id: string, title: string) {
-    if (!window.confirm(`Delete "${title || "Untitled project"}"? This can't be undone once you save.`)) return;
+  async function remove(id: string, title: string) {
+    const ok = await confirm({
+      title: "Delete project?",
+      message: `Delete "${title || "Untitled project"}"? This can't be undone once you save.`,
+      confirmLabel: "Delete",
+      tone: "danger",
+    });
+    if (!ok) return;
     onChange(projects.filter((p) => p.id !== id));
   }
 

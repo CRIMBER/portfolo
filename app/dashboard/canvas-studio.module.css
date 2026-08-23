@@ -22,9 +22,14 @@
   align-items: flex-end;
 }
 
+/* See the matching comment in content-panels.module.css's .field —
+   same fix for the same globals.css `label { align-items: center }`
+   leak (text/select/slider were centering and shrinking instead of
+   sitting flush left and filling the field). */
 .controlField {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   gap: 6px;
   font-size: 0.8rem;
   color: var(--text-muted);
@@ -193,12 +198,6 @@
      field. auto-fit collapses those empty tracks so the real fields
      actually grow to fill the row. */
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
-}
-
-.inspectorRow {
-  display: flex;
-  flex-wrap: wrap;
   gap: 12px;
 }
 
